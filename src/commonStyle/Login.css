@@ -1,0 +1,99 @@
+/* Add this to your CSS file (e.g., Login.css) */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .card {
+    background-color: white; /* Make sure the background is white */
+    border-radius: 8px; /* Optional: Adds rounded corners to the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
+  }
+
+  .login-bt ,.reset{
+   background-color:  #004eaa;
+   width: 250px;
+  }
+
+/* input of captcha field */
+  .captcha-wrapper input {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.captcha-wrapper input:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* alignment of fields */
+.captcha-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.captcha-wrapper .btn {
+margin-right: 10px;}
+
+/* captcha Image style */
+.captcha-main {
+    display: flex;
+    align-items: center;
+  }
+  
+  .captcha-image {
+    display: inline-block;
+    width: 200px;
+    padding: 5px;
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: relative;
+    user-select: none; /* Disable text selection */
+  }
+  
+  .captcha-char {
+    display: inline-block;
+    transform: rotate(calc(-10deg + 20deg * var(--rotation)));
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .captcha-char:nth-child(even) {
+    color: #555;
+    transform: rotate(calc(10deg * var(--rotation)));
+  }
+  
+  .captcha-image::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      rgba(0, 0, 0, 0.1) 4px,
+      rgba(0, 0, 0, 0.1) 8px
+    );
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  /* captcha Image style end*/
