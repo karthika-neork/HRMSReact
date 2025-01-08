@@ -1,29 +1,43 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaSearch, FaCog, FaBell, FaSignOutAlt } from "react-icons/fa";
 import Dropdown from "react-bootstrap/Dropdown";
-import SubHeader from "./SubHeader"; // Import SubHeader
-import "../commonStyle/HeaderPage.css";
+import SubHeader from "./SubHeader";
+import EmployeeDashboard from './EmployeeDashboardPage';
+import EmployeeProfile from './EmployeeProfilePage';
+import EmployeeLeave from './EmployeeLeavePAge';
+import RolePage from "./RolePage";
+import DesignationPage from './DesignationPage';
+import NotificationPage from './NotificationPage'
 
-const Header = () => {
+const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState("Roles"); // Default tab for Masters
-  const [showSubHeader, setShowSubHeader] = useState(false); // Show SubHeader only for Masters
+  const [activeTab, setActiveTab] = useState("");
+  const [showSubHeader, setShowSubHeader] = useState(false);
+  const [menuType, setMenuType] = useState(null);
+  const [currentPage, setCurrentPage] = useState(null);
 
   const settingsRef = useRef(null);
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
+
+
+  useEffect(() => {
+    if (defaultSection) {
+      setShowSubHeader(true);
+      setMenuType(defaultSection);
+      setActiveTab(defaultSection === 'Employees' ? 'Dashboard' : 'Roles');
+      setCurrentPage(defaultSection === 'Employees' ? 'dashboard' : 'roles');
+    }
+  }, [defaultSection]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {
         setShowSettings(false);
       }
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
-      ) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setShowNotifications(false);
       }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -35,30 +49,135 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleDropdownClick = (menuItem) => {
-    if (menuItem === "Masters") {
-      setShowSubHeader(true); // Show SubHeader when Masters is clicked
-      setActiveTab("Roles"); // Default to Roles tab
-    } else {
-      setShowSubHeader(false); // Hide SubHeader for other dropdown items
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (menuType === 'Employees') {
+      switch (tab) {
+        case 'Dashboard':
+          setCurrentPage('dashboard');
+          break;
+        case 'Profile':
+          setCurrentPage('profile');
+          break;
+        case 'Leave':
+          setCurrentPage('leave');
+          break;
+        default:
+          setCurrentPage(null);
+      }
+    } else if (menuType === 'Masters') {
+      switch (tab) {
+        case 'Roles':
+          setCurrentPage('roles');
+          break;
+        case 'Designations':
+          setCurrentPage('designations');
+          break;
+        case 'Technologies':
+          setCurrentPage('technologies');
+          break;
+        case 'Leave Types':
+          setCurrentPage('leaveTypes');
+          break;
+        default:
+          setCurrentPage(null);
+      }
     }
   };
 
+  const handleDropdownClick = (menuItem) => {
+    if (menuItem === "Masters") {
+      setShowSubHeader(true);
+      setMenuType('Masters');
+      setActiveTab('Roles');
+      setCurrentPage('roles');
+    } else if (menuItem === "Employees") {
+      setShowSubHeader(true);
+      setMenuType('Employees');
+      setActiveTab('Dashboard');
+      setCurrentPage('dashboard');
+    }
+    else if (menuItem === "Notifications") {
+      setShowSubHeader(false);
+      setMenuType(null);
+      setCurrentPage('notifications');
+    } else {
+      setShowSubHeader(false);
+      setMenuType(null);
+      setCurrentPage(null);
+    }
+  };
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+  //       setShowSettings(false);
+  //     }
+  //     if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+  //       setShowNotifications(false);
+  //     }
+  //     if (profileRef.current && !profileRef.current.contains(event.target)) {
+  //       setShowProfile(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, []);
+
+  // const handleTabChange = (tab) => {
+  //   setActiveTab(tab);
+  //   if (menuType === 'Employees') {
+  //     switch (tab) {
+  //       case 'Dashboard':
+  //         setCurrentPage('dashboard');
+  //         break;
+  //       case 'Profile':
+  //         setCurrentPage('profile');
+  //         break;
+  //       case 'Leave':
+  //         setCurrentPage('leave');
+  //         break;
+  //       default:
+  //         setCurrentPage(null);
+  //     }
+  //   }
+  // };
+
+  // const handleDropdownClick = (menuItem) => {
+  //   if (menuItem === "Masters") {
+  //     setShowSubHeader(true);
+  //     setMenuType('Masters');
+  //     setActiveTab('Masters');
+  //     setCurrentPage(null);
+  //   } else if (menuItem === "Employees") {
+  //     setShowSubHeader(true);
+  //     setMenuType('Employees');
+  //     setActiveTab('Dashboard');
+  //     setCurrentPage('dashboard');
+  //   } else {
+  //     setShowSubHeader(false);
+  //     setMenuType(null);
+  //     setCurrentPage(null);
+  //   }
+  // };
   const handleLogout = () => {
     console.log("Logout clicked");
     // Add your logout logic here
   };
 
   return (
-    <>
+    <div>
       <div className="header-wrapper">
         <div className="header-content">
           {/* Left section */}
           <div className="header-left">
             <div className="logo">
-              {/* Neork<span className="trademark">®</span> */}
-              <img src="https://i.postimg.cc/13MWDfQC/logo-white.png" alt=""  style={{ width: '100px', height: 'auto' }}/>
-
+              <img
+                src="https://i.postimg.cc/13MWDfQC/logo-white.png"
+                alt=""
+                style={{ width: '100px', height: 'auto' }}
+              />
             </div>
             <div className="search-container ms-5">
               <input
@@ -78,22 +197,13 @@ const Header = () => {
                 onToggle={(isOpen) => setShowSettings(isOpen)}
               >
                 <Dropdown.Toggle bsPrefix="custom-dropdown-toggle" className="icon-btn">
-                  <FaCog
-                    className="icon"
-                    onClick={() => setShowSettings(!showSettings)}
-                  />
+                  <FaCog className="icon" onClick={() => setShowSettings(!showSettings)} />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item
-                    onClick={() => handleDropdownClick("Masters")} // Show SubHeader for Masters
-                    className="dropdown-item"
-                  >
+                  <Dropdown.Item onClick={() => handleDropdownClick("Masters")}>
                     Masters
                   </Dropdown.Item>
-                  <Dropdown.Item
-                    onClick={() => handleDropdownClick("Employees")}
-                    className="dropdown-item"
-                  >
+                  <Dropdown.Item onClick={() => handleDropdownClick("Employees")}>
                     Employees
                   </Dropdown.Item>
                   <Dropdown.Item
@@ -103,15 +213,15 @@ const Header = () => {
                     Notification
                   </Dropdown.Item>
                   <Dropdown.Item
-                    onClick={() => handleDropdownClick("Others")}
+                    onClick={() => handleDropdownClick("Notifications")}
                     className="dropdown-item"
                   >
                     Others
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-            </div>
 
+            </div>
             {/* Notifications Dropdown */}
             <div className="dropdown-container" ref={notificationRef}>
               <Dropdown
@@ -158,12 +268,22 @@ const Header = () => {
           </div>
         </div>
       </div>
-
-      {/* Render SubHeader only when showSubHeader is true */}
       {showSubHeader && (
-        <SubHeader activeTab={activeTab} onTabChange={setActiveTab} />
+        <SubHeader
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          menuType={menuType}
+        />
       )}
-    </>
+
+      {/* Render pages based on currentPage state */}
+      {currentPage === 'dashboard' && <EmployeeDashboard />}
+      {currentPage === 'profile' && <EmployeeProfile />}
+      {currentPage === 'leave' && <EmployeeLeave />}
+      {currentPage === 'roles' && <RolePage />}
+      {currentPage === 'designations' && <DesignationPage />}
+      {currentPage === 'notifications' && <NotificationPage />}
+    </div >
   );
 };
 

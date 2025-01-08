@@ -1,8 +1,11 @@
 import React from 'react';
 import "../commonStyle/HeaderPage.css";
 
-const SubHeader = ({ activeTab, onTabChange }) => {
-  const tabs = ['Masters', 'Roles', 'Designations', 'Technologies', 'Leave Types'];
+const SubHeader = ({ activeTab, onTabChange, menuType }) => {
+  const mastersTabs = ['Masters', 'Roles', 'Designations', 'Technologies', 'Leave Types'];
+  const employeeTabs = ['Dashboard', 'Profile', 'Leave'];
+  
+  const tabs = menuType === 'Masters' ? mastersTabs : employeeTabs;
 
   return (
     <div className="subheader-wrapper">
@@ -22,4 +25,3 @@ const SubHeader = ({ activeTab, onTabChange }) => {
 };
 
 export default SubHeader;
-
