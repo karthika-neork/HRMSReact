@@ -1,0 +1,49 @@
+.custom-container {
+    padding: 70px; /* Add padding around the container */
+  }
+  
+  .homepage {
+    background-color: #f9f9f9;
+  }
+  
+  .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Slightly reduced gap to ensure all cards fit */
+  }
+  
+  .col {
+    position: relative;
+    flex: 1 1 calc(24% - 15px); /* Adjust width to fit all cards in a row */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+  }
+  
+  .text-start {
+    text-align: left;
+  }
+  
+  .bold-text {
+    font-weight: bold; /* Makes the second line bold */
+    font-size: 1.2rem;
+    margin: 5px 0;
+  }
+  
+  .green-text {
+    color: #28a745; /* Green color for the last line */
+    font-size: 0.9rem;
+    margin: 5px 0;
+  }
+  
+  .icon-right {
+    position: absolute; /* Position the icon in the top-right corner */
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem; /* Adjust icon size */
+    color: #6c757d; /* Optional icon color */
+  }
+  
