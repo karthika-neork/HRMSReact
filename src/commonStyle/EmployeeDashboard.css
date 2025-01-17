@@ -1,0 +1,16 @@
+.container-body .card {
+    margin: 5px 0; 
+    width: 100%; 
+    padding: 30px;
+    margin-left: 100px;
+    height: 120px;
+  }
+  
+  .container-body .row {
+    gap: 80px; /* Reduce spacing between cards */
+    
+  }
+  
+  .card{
+    width: 50px;
+  }

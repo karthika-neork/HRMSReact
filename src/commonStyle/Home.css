@@ -47,3 +47,17 @@
     color: #6c757d; /* Optional icon color */
   }
   
+
+
+  .add-page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 60vh; /* Ensures the container covers the full viewport */
+}
+
+.footer-buttons {
+    background-color: white; /* White background to match the design */
+    box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+    padding: 15px 20px; /* Padding for buttons */
+    margin-top: auto; /* Pushes the footer to the bottom */
+}
