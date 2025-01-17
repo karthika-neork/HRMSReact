@@ -8,6 +8,8 @@ import EmployeeLeave from './EmployeeLeavePAge';
 import RolePage from "./RolePage";
 import DesignationPage from './DesignationPage';
 import NotificationPage from './NotificationPage'
+import Technologies from "./Technologies";
+import LeaveTypes from "./LeaveTypes";
 
 const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
@@ -237,8 +239,9 @@ const Header = ({ defaultSection = "Employees" }) => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="notifications-menu">
                   <Dropdown.Header>Notifications</Dropdown.Header>
+                  <p>No new notifications</p> 
                   <Dropdown.Item className="notification-item">
-                    No new notifications
+                   <button className="btn btn-primary">View All Message</button>
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -282,6 +285,8 @@ const Header = ({ defaultSection = "Employees" }) => {
       {currentPage === 'leave' && <EmployeeLeave />}
       {currentPage === 'roles' && <RolePage />}
       {currentPage === 'designations' && <DesignationPage />}
+      {currentPage === 'technologies' && <Technologies />}
+      {currentPage === 'leaveTypes' && <LeaveTypes />}
       {currentPage === 'notifications' && <NotificationPage />}
     </div >
   );
