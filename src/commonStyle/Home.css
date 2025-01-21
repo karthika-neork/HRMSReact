@@ -6,12 +6,12 @@
     background-color: #f9f9f9;
   }
   
-  .row {
+  /* .row {
     display: flex;
     justify-content: space-between;
-    gap: 20px; /* Slightly reduced gap to ensure all cards fit */
+    gap: 20px;
   }
-  
+   */
   .col {
     position: relative;
     flex: 1 1 calc(24% - 15px); /* Adjust width to fit all cards in a row */

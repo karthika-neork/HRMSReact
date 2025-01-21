@@ -8,7 +8,7 @@ import Role from './crudPages/Role';
 import SubHeader from './components/SubHeader';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboardPage';
-
+import PolicyPage from './components/PolicyPage'
 function App() {
   return (
     <div className="App">
@@ -21,6 +21,7 @@ function App() {
           <Route path="/role" element={<Role />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+          <Route path="/policy" element={<PolicyPage />} />
         </Routes>
       </Router>
     </div>
