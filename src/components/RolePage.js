@@ -17,6 +17,7 @@ import SubHeader from "../components/SubHeader";
 import DataTable from 'react-data-table-component';
 import { FaEye } from "react-icons/fa";
 import { FaCheckCircle } from 'react-icons/fa';
+import RolePermission from "./RolePermission";
 
 function Role() {
     const [pageIndex, setPageIndex] = useState(0);
@@ -470,13 +471,6 @@ return (
         <div className="table-container" style={{ overflowX: 'hidden', overflowY: 'hidden',width:'100%',padding:'30px' }}>
             {/* <Header/> */}
             {/* <SubHeader/> */}
-            {/* <RolesAdd 
-            permissions={permissions}
-             fetchRoles={fetchRoles}
-             mode={formMode}
-              roles={selectedRole} 
-              roleData={roleData}
-              /> */}
 
 
                  {/* <div className="page-breadcrumb d-flex align-items-center mt-3 ms-3">
@@ -638,6 +632,13 @@ return (
               ></textarea>
               {errors.description && <span className='text-danger'>{errors.description}</span>}
             </div>
+            <RolePermission 
+            permissions={permissions}
+             fetchRoles={fetchRoles}
+             mode={formMode}
+              roles={selectedRole} 
+              roleData={roleData}
+              />
 
             <hr />
 
