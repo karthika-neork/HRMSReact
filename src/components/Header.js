@@ -10,7 +10,7 @@ import DesignationPage from './DesignationPage';
 import NotificationPage from './NotificationPage'
 import Technologies from "./Technologies";
 import LeaveTypes from "./LeaveTypes";
-
+import PolicyPage from "./PolicyPage"
 const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -98,11 +98,15 @@ const Header = ({ defaultSection = "Employees" }) => {
       setMenuType('Employees');
       setActiveTab('Dashboard');
       setCurrentPage('dashboard');
-    }
-    else if (menuItem === "Notifications") {
+    } else if (menuItem === "Notifications") {
       setShowSubHeader(false);
       setMenuType(null);
       setCurrentPage('notifications');
+    } else if (menuItem === "Policy") {
+      setShowSubHeader(false); // Adjust as per your requirements
+      setMenuType('Policy');
+      setActiveTab(null); // Adjust as per your requirements
+      setCurrentPage('policy');
     } else {
       setShowSubHeader(false);
       setMenuType(null);
@@ -110,59 +114,6 @@ const Header = ({ defaultSection = "Employees" }) => {
     }
   };
 
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (settingsRef.current && !settingsRef.current.contains(event.target)) {
-  //       setShowSettings(false);
-  //     }
-  //     if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-  //       setShowNotifications(false);
-  //     }
-  //     if (profileRef.current && !profileRef.current.contains(event.target)) {
-  //       setShowProfile(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => document.removeEventListener("mousedown", handleClickOutside);
-  // }, []);
-
-  // const handleTabChange = (tab) => {
-  //   setActiveTab(tab);
-  //   if (menuType === 'Employees') {
-  //     switch (tab) {
-  //       case 'Dashboard':
-  //         setCurrentPage('dashboard');
-  //         break;
-  //       case 'Profile':
-  //         setCurrentPage('profile');
-  //         break;
-  //       case 'Leave':
-  //         setCurrentPage('leave');
-  //         break;
-  //       default:
-  //         setCurrentPage(null);
-  //     }
-  //   }
-  // };
-
-  // const handleDropdownClick = (menuItem) => {
-  //   if (menuItem === "Masters") {
-  //     setShowSubHeader(true);
-  //     setMenuType('Masters');
-  //     setActiveTab('Masters');
-  //     setCurrentPage(null);
-  //   } else if (menuItem === "Employees") {
-  //     setShowSubHeader(true);
-  //     setMenuType('Employees');
-  //     setActiveTab('Dashboard');
-  //     setCurrentPage('dashboard');
-  //   } else {
-  //     setShowSubHeader(false);
-  //     setMenuType(null);
-  //     setCurrentPage(null);
-  //   }
-  // };
   const handleLogout = () => {
     console.log("Logout clicked");
     // Add your logout logic here
@@ -215,10 +166,10 @@ const Header = ({ defaultSection = "Employees" }) => {
                     Notification
                   </Dropdown.Item>
                   <Dropdown.Item
-                    onClick={() => handleDropdownClick("Notifications")}
+                    onClick={() => handleDropdownClick("Policy")}
                     className="dropdown-item"
                   >
-                    Others
+                    Policy
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -239,9 +190,9 @@ const Header = ({ defaultSection = "Employees" }) => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu className="notifications-menu">
                   <Dropdown.Header>Notifications</Dropdown.Header>
-                  <p>No new notifications</p> 
-                  <Dropdown.Item className="notification-item">
-                   <button className="btn btn-primary">View All Message</button>
+                  <p>No new notifications</p>
+                  <Dropdown.Item className="notification-item" onClick={() => handleDropdownClick("Notifications")}>
+                    <button className="btn btn-primary">View All Message</button>
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
@@ -288,6 +239,8 @@ const Header = ({ defaultSection = "Employees" }) => {
       {currentPage === 'technologies' && <Technologies />}
       {currentPage === 'leaveTypes' && <LeaveTypes />}
       {currentPage === 'notifications' && <NotificationPage />}
+      {currentPage === 'policy' && <PolicyPage />}
+
     </div >
   );
 };
