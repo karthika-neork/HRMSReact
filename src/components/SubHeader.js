@@ -3,7 +3,7 @@ import "../commonStyle/HeaderPage.css";
 
 const SubHeader = ({ activeTab, onTabChange, menuType }) => {
   const mastersTabs = ['Masters', 'Roles', 'Designations', 'Technologies', 'Leave Types'];
-  const employeeTabs = ['Dashboard', 'Profile', 'Leave'];
+  const employeeTabs = ['Dashboard', 'Profile', 'Leave', 'Employee List', 'Employee Leave List', 'Payroll Report'];
   
   const tabs = menuType === 'Masters' ? mastersTabs : employeeTabs;
 

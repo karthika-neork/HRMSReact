@@ -46,8 +46,7 @@ function EmployeeDashboard() {
 
   return (
     <div className="container-body"  style={{ overflowX: 'hidden', overflowY: 'hidden',width:'100%',padding:'30px' }}>
-      <h4>Employee Dashboard</h4>
-      
+      <h4>Employee Dashboard</h4>      
       {/* Row for leave data */}
       <div className="row justify-content-start mb-4"> 
         <div className="col-md-3">
