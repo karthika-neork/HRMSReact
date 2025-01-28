@@ -33,7 +33,7 @@ function NotificationPAge() {
 
                 <div className="notification-page">
                     <h1 className="header-title d-flex justify-content-between align-items-center">
-                        <span>Notifications</span>
+                        <h4>Notifications </h4>
                         <div className="d-flex justify-content-between align-items-center">
                             <span style={{ fontWeight: "normal", fontSize: '17px' }}>show</span>
                             <select

@@ -11,6 +11,10 @@ import NotificationPage from './NotificationPage'
 import Technologies from "./Technologies";
 import LeaveTypes from "./LeaveTypes";
 import PolicyPage from "./PolicyPage"
+import HolidayPage from "./HolidayPage";
+import EmployeeList from "./EmployeeList";
+import EmployeeLeaveList from "./EmployeeLeaveList";
+import PayrollReport from "./PayrollReport";
 const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -64,6 +68,15 @@ const Header = ({ defaultSection = "Employees" }) => {
         case 'Leave':
           setCurrentPage('leave');
           break;
+        case 'Employee List':
+          setCurrentPage('employee-list');
+          break;
+        case 'Employee Leave List':
+          setCurrentPage('employee-leave-list');
+          break;
+        case 'Payroll Report':
+          setCurrentPage('payroll-report');
+          break;
         default:
           setCurrentPage(null);
       }
@@ -107,6 +120,12 @@ const Header = ({ defaultSection = "Employees" }) => {
       setMenuType('Policy');
       setActiveTab(null); // Adjust as per your requirements
       setCurrentPage('policy');
+    }
+     else if (menuItem === "Holiday") {
+      setShowSubHeader(false); 
+      setMenuType('holiday');
+      setActiveTab(null); 
+      setCurrentPage('holiday');
     } else {
       setShowSubHeader(false);
       setMenuType(null);
@@ -171,6 +190,12 @@ const Header = ({ defaultSection = "Employees" }) => {
                   >
                     Policy
                   </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={() => handleDropdownClick("Holiday")}
+                    className="dropdown-item"
+                  >
+                    Holiday
+                  </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
 
@@ -234,12 +259,16 @@ const Header = ({ defaultSection = "Employees" }) => {
       {currentPage === 'dashboard' && <EmployeeDashboard />}
       {currentPage === 'profile' && <EmployeeProfile />}
       {currentPage === 'leave' && <EmployeeLeave />}
+      {currentPage === 'employee-list' && <EmployeeList />}
+      {currentPage === 'employee-leave-list' && <EmployeeLeaveList />}
+      {currentPage === 'payroll-report' && <PayrollReport />}
       {currentPage === 'roles' && <RolePage />}
       {currentPage === 'designations' && <DesignationPage />}
       {currentPage === 'technologies' && <Technologies />}
       {currentPage === 'leaveTypes' && <LeaveTypes />}
       {currentPage === 'notifications' && <NotificationPage />}
       {currentPage === 'policy' && <PolicyPage />}
+      {currentPage === 'holiday' && <HolidayPage />}
 
     </div >
   );
