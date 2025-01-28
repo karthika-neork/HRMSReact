@@ -10,7 +10,9 @@ import DesignationPage from './DesignationPage';
 import NotificationPage from './NotificationPage'
 import Technologies from "./Technologies";
 import LeaveTypes from "./LeaveTypes";
-import PolicyPage from "./PolicyPage"
+import PolicyPage from "./PolicyPage";
+import PayroleReportPage from "./PayroleReportPage"
+
 const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -239,6 +241,7 @@ const Header = ({ defaultSection = "Employees" }) => {
       {currentPage === 'technologies' && <Technologies />}
       {currentPage === 'leaveTypes' && <LeaveTypes />}
       {currentPage === 'notifications' && <NotificationPage />}
+      {currentPage === 'payrole-report' && <PayroleReportPage />}
       {currentPage === 'policy' && <PolicyPage />}
 
     </div >
