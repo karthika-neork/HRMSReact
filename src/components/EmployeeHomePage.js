@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from './Header';
 
-function HomePage() {
+function EmployeeHomePage() {
   return (
     <div className="min-h-screen">
       <Header defaultSection="Employees" />
@@ -9,4 +9,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default EmployeeHomePage;

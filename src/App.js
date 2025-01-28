@@ -9,6 +9,9 @@ import SubHeader from './components/SubHeader';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboardPage';
 import PolicyPage from './components/PolicyPage'
+import EmployeeHomePage from './components/EmployeeHomePage';
+
+
 function App() {
   return (
     <div className="App">
@@ -22,6 +25,7 @@ function App() {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/policy" element={<PolicyPage />} />
+          <Route path="/emp-home" element={<EmployeeHomePage />} />
         </Routes>
       </Router>
     </div>
