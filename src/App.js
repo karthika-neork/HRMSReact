@@ -6,7 +6,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Header from './components/Header';
 import Role from './crudPages/Role';
 import SubHeader from './components/SubHeader';
-import AdminDashboard from './components/AdminDashboard';
+import HomeLayout from './components/HomeLayout';
 import EmployeeDashboard from './components/EmployeeDashboardPage';
 import PolicyPage from './components/PolicyPage'
 import EmployeeHomePage from './components/EmployeeHomePage';
@@ -23,7 +23,7 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/role" element={<Role />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/home-layout" element={<HomeLayout />} />
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/emp-home" element={<EmployeeHomePage />} />

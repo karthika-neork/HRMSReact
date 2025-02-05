@@ -3,7 +3,7 @@ import "../commonStyle/Home.css";
 import { BsCalendarEventFill } from "react-icons/bs";
 import Header from './Header';
 
-function AdminDashboard() {
+function HomeLayout() {
   return (
     <>
     <Header/>
@@ -45,4 +45,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default HomeLayout;
