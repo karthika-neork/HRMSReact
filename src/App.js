@@ -10,6 +10,7 @@ import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboardPage';
 import PolicyPage from './components/PolicyPage'
 import EmployeeHomePage from './components/EmployeeHomePage';
+import Footer from './components/Footer';
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/emp-home" element={<EmployeeHomePage />} />
         </Routes>
+        <Footer />
       </Router>
     </div>
   );

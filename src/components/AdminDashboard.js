@@ -8,8 +8,8 @@ function AdminDashboard() {
     <>
     <Header/>
 
-    {/* <div className="custom-container">
-      <div className="homepage">
+    <div className="custom-container">
+      {/* <div className="homepage">
         <div className="row">
           <div className="col text-start">
             Revenue
@@ -39,8 +39,8 @@ function AdminDashboard() {
             <i className="icon-right"><BsCalendarEventFill /></i>
           </div>
         </div>
-      </div>
-    </div> */}
+      </div> */}
+    </div>
     </>
   );
 }

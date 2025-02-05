@@ -15,6 +15,8 @@ import HolidayPage from "./HolidayPage";
 import EmployeeList from "./EmployeeList";
 import EmployeeLeaveList from "./EmployeeLeaveList";
 import PayrollReport from "./PayrollReport";
+import AddEmployee from "./AddEmployee";
+import AttedanceList from "./AttedanceList";
 const Header = ({ defaultSection = "Employees" }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -62,8 +64,14 @@ const Header = ({ defaultSection = "Employees" }) => {
         case 'Dashboard':
           setCurrentPage('dashboard');
           break;
+        case 'Attedance':
+          setCurrentPage('attedance');
+          break;
         case 'Profile':
           setCurrentPage('profile');
+          break;
+        case 'Add Employee':
+          setCurrentPage('add-employee');
           break;
         case 'Leave':
           setCurrentPage('leave');
@@ -257,7 +265,9 @@ const Header = ({ defaultSection = "Employees" }) => {
 
       {/* Render pages based on currentPage state */}
       {currentPage === 'dashboard' && <EmployeeDashboard />}
+      {currentPage === 'attedance' && <AttedanceList />}
       {currentPage === 'profile' && <EmployeeProfile />}
+      {currentPage === 'add-employee' && <AddEmployee />}
       {currentPage === 'leave' && <EmployeeLeave />}
       {currentPage === 'employee-list' && <EmployeeList />}
       {currentPage === 'employee-leave-list' && <EmployeeLeaveList />}
