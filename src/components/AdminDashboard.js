@@ -8,7 +8,7 @@ function AdminDashboard() {
     <>
     <Header/>
 
-    <div className="custom-container">
+    {/* <div className="custom-container">
       <div className="homepage">
         <div className="row">
           <div className="col text-start">
@@ -40,7 +40,7 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </div> */}
     </>
   );
 }

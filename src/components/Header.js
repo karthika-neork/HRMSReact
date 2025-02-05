@@ -10,7 +10,6 @@ import DesignationPage from './DesignationPage';
 import NotificationPage from './NotificationPage'
 import Technologies from "./Technologies";
 import LeaveTypes from "./LeaveTypes";
-import PayroleReportPage from "./PayroleReportPage"
 import PolicyPage from "./PolicyPage"
 import HolidayPage from "./HolidayPage";
 import EmployeeList from "./EmployeeList";
@@ -122,10 +121,10 @@ const Header = ({ defaultSection = "Employees" }) => {
       setActiveTab(null); // Adjust as per your requirements
       setCurrentPage('policy');
     }
-     else if (menuItem === "Holiday") {
-      setShowSubHeader(false); 
+    else if (menuItem === "Holiday") {
+      setShowSubHeader(false);
       setMenuType('holiday');
-      setActiveTab(null); 
+      setActiveTab(null);
       setCurrentPage('holiday');
     } else {
       setShowSubHeader(false);
@@ -268,7 +267,6 @@ const Header = ({ defaultSection = "Employees" }) => {
       {currentPage === 'technologies' && <Technologies />}
       {currentPage === 'leaveTypes' && <LeaveTypes />}
       {currentPage === 'notifications' && <NotificationPage />}
-      {currentPage === 'payrole-report' && <PayroleReportPage />}
       {currentPage === 'policy' && <PolicyPage />}
       {currentPage === 'holiday' && <HolidayPage />}
 
