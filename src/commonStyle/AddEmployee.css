@@ -1,0 +1,78 @@
+.stepper-container {
+    margin: 30px 0;
+    position: relative;
+}
+
+.step-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.step-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+/* The connecting line (default state) */
+.step-line {
+    position: absolute;
+    content: "";
+    height: 2px;
+    width: 100%;
+    background-color: #b7cde6; /* Light gray for inactive lines */
+    top: 15px;
+    left: -50%;
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+/* Active state for the line */
+.step-line.active {
+    background-color: #0047bb; /* Blue for active or completed lines */
+}
+
+/* Circles */
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #b3c9e3; /* Default light gray */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.step-circle.active {
+    background-color: #0047bb; /* Blue for active step */
+}
+
+.step-circle.completed {
+    background-color: #0047bb; /* Blue for completed steps */
+}
+
+/* Text */
+.step-text {
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d; /* Default gray */
+    text-align: center;
+}
+
+.step-text.active {
+    color: #007bff; /* Blue for active step */
+}
+
+.step-text.completed {
+    color: #007bff; /* Blue for completed steps */
+}
