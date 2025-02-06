@@ -1,15 +1,15 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import DataTable from "react-data-table-component";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilePdf, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Button } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faEdit, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FaTrash } from 'react-icons/fa';
 import { Bounce, toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { width } from '@fortawesome/free-solid-svg-icons/fa0';
 // import FileUploadWithPreview from './FileUploadWithPreview';
 
 function EmployeeList() {
@@ -104,34 +104,129 @@ function EmployeeList() {
         }
     };
 
+    useEffect(() => {
+        setEmployeeList([
+            {
+                user_id: 1,
+                employee_code: "EMP001",
+                name: "John Doe",
+                designation_name: "Software Engineer",
+                date_of_joining: "2021-06-15",
+                status: "Active",
+            },
+            {
+                user_id: 2,
+                employee_code: "EMP002",
+                name: "Jane Smith",
+                designation_name: "Project Manager",
+                date_of_joining: "2019-03-10",
+                status: "Inactive",
+            },
+        ]);
+    }, []);
+
+    // PDF Generator Function
+    const generatePDF = async (employee = null) => {
+        const doc = new jsPDF();
+        
+        // Add image
+        const imgUrl = "https://i.postimg.cc/xdr6DCmg/neork-logo-200.png";
+        const imgWidth = 40; // Adjust as needed
+        const imgHeight = 20; // Adjust as needed
+    
+        const addImageToPDF = (imageData) => {
+            doc.addImage(imageData, "PNG", 150, 10, imgWidth, imgHeight); // Adjust position as needed
+        };
+    
+        try {
+            const imgData = await getBase64ImageFromUrl(imgUrl);
+            addImageToPDF(imgData);
+        } catch (error) {
+            console.error("Error loading image:", error);
+        }
+    
+        // Add title
+        doc.text("Employee Report", 14, 30);
+    
+        if (employee) {
+            autoTable(doc, {
+                startY: 40, // Adjust position after the image
+                head: [["Field", "Value"]],
+                body: [
+                    ["Employee Code", employee.employee_code],
+                    ["Name", employee.name],
+                    ["Designation", employee.designation_name],
+                    ["Joined Date", employee.date_of_joining],
+                    ["Status", employee.status],
+                ],
+            });
+            doc.save(`${employee.name}_Employee.pdf`);
+        } else {
+            autoTable(doc, {
+                startY: 40, // Adjust position after the image
+                head: [["EMP-CODE", "Name", "DESIGNATION", "JOINED DATE", "Status"]],
+                body: employeelist.map((emp) => [
+                    emp.employee_code,
+                    emp.name,
+                    emp.designation_name,
+                    emp.date_of_joining,
+                    emp.status,
+                ]),
+            });
+            doc.save("Employee_List.pdf");
+        }
+    };
+    
+    // Function to convert image URL to Base64
+    const getBase64ImageFromUrl = async (imageUrl) => {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    };
+    
+    // Table Columns
     const columns = [
-        { headerName: "#", valueGetter: (params) => currentPage * pageSize + (params.node.rowIndex + 1), sortable: true },
-        { headerName: "EMP-CODE", field: "employee_code", sortable: true },
-        { headerName: "Name", field: "name", sortable: true },
-        { headerName: "DESIGNATION", field: "designation_name", sortable: true },
-        { headerName: "JOINED DATE", field: "date_of_joining", sortable: true },
-        { headerName: "Status", field: "status", sortable: true },
+        { name: "#", selector: (row, index) => index + 1, sortable: true, width: "5%" },
+        { name: "EMP-CODE", selector: (row) => row.employee_code, sortable: true, width: "15%" },
+        { name: "Name", selector: (row) => row.name, sortable: true, width: "20%" },
+        { name: "DESIGNATION", selector: (row) => row.designation_name, sortable: true, width: "20%" },
+        { name: "JOINED DATE", selector: (row) => row.date_of_joining, sortable: true, width: "15%" },
+        { name: "Status", selector: (row) => row.status, sortable: true, width: "10%" },
         {
-            headerName: 'Action',
-            field: 'action',
-            cellRendererFramework: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Button className="cursor-pointer me-2" onClick={() => handleEditBtn(params.data)}>
-                        <FontAwesomeIcon icon={faEdit} />
-                    </Button>
-                    <a className="cursor-pointer text-danger ms-2 custom-icon"
-                        onClick={() => handleDeleteBtn(params.data)}>
-                        <FontAwesomeIcon icon={faTimes} />
-                    </a>
-                    <a className="cursor-pointer text-danger ms-2 custom-icon"
-                        onClick={() => handleDeleteBtn(params.data)}>
-                        <FontAwesomeIcon icon={faClock} />
-                    </a>
+            name: ( 
+                <div className="d-flex align-items-center gap-2">
+                    <span>Action</span>
+                    <a className='mb-2' onClick={() => generatePDF()} style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "2rem", color: "blue" }}>
+        <FontAwesomeIcon style={{ width: "", height: "20px" }} icon={faFilePdf} />
+    </a>
                 </div>
             ),
+            cell: (row) => (
+<div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px" }}>
+    <a onClick={() => handleEditBtn(row)} style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "blue" }}>
+        <FontAwesomeIcon icon={faEdit} />
+    </a>
+    
+    <a onClick={() => handleDeleteBtn(row)} style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "red" }}>
+        <FontAwesomeIcon icon={faTrash} />
+    </a>
+    
+    <a className='mb-2' onClick={() => generatePDF(row)} style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "2rem", color: "blue" }}>
+        <FontAwesomeIcon style={{ width: "", height: "20px" }} icon={faFilePdf} />
+    </a>
+</div>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+            width: "15%",
         },
     ];
-
     const changePageSize = (size) => {
         setPageSize(size);
         setCurrentPage(0);
@@ -193,19 +288,19 @@ function EmployeeList() {
                         <div className="btm-for mb-4 text-lg-end">
                             <div className="ms-auto">
                                 <div className="btn-group">
-                                    <Button href='add-employee' className="btn template-btn px-5" onClick={handleAddPage}>
+                                    <Button href='add-employees' className="btn template-btn px-5" onClick={handleAddPage}>
                                         Add
                                     </Button>
                                 </div>
                             </div>
-                        </div>
+                        </div> 
                     </div>
                 </div>
                 <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px' }}>
 
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <div className="text-start ms-2">
-                            <span>Show</span>
+                            {/* <span>Show</span>
                             <select
                                 className="mx-2"
                                 value={pageSize}
@@ -217,7 +312,7 @@ function EmployeeList() {
                                     </option>
                                 ))}
                             </select>
-                            <span>entries</span>
+                            <span>entries</span> */}
                         </div>
 
                         <div className="flex justify-center text-end mb-3 me-3" >
@@ -227,17 +322,16 @@ function EmployeeList() {
                                 placeholder="Search..." />
                         </div>
                     </div>
-
-                    <div className="ag-theme-alpine" style={{ width: '100%', fontSize: '16px' }}>
-                        <AgGridReact
-                            columnDefs={columns}
-                            rowData={employeelist}
-                            domLayout='autoHeight'
-                            defaultColDef={{ flex: 1, minWidth: 100 }}
-                        />
-                    </div>
-
-                    <div className="text-end me-2 ">
+<div style={{ overflowX: 'hidden', overflowY: 'hidden',   }}>
+                    <DataTable
+                columns={columns}
+                data={employeelist}
+                pagination
+                highlightOnHover
+                responsive
+            />
+</div>
+                    {/* <div className="text-end me-2 ">
                         <button className="btn btn-white" onClick={previousPage} disabled={!canPreviousPage}>
                             Prev
                         </button>
@@ -257,7 +351,7 @@ function EmployeeList() {
 
                     <div className="text-start ms-2 mb-2">
                         Showing {firstRowIndex} to {lastRowIndex} of {totalCount} entries
-                    </div>
+                    </div> */}
                 </div>
 
             </>
@@ -269,3 +363,133 @@ function EmployeeList() {
 
 
 export default EmployeeList;
+
+
+
+// import React, { useEffect, useState } from "react";
+// import DataTable from "react-data-table-component";
+// import { Button } from "react-bootstrap";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faFilePdf, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+// import jsPDF from "jspdf";
+// import autoTable from "jspdf-autotable";
+
+// function EmployeeList() {
+//     const [employeelist, setEmployeeList] = useState([]);
+
+//     // Dummy Data
+//     useEffect(() => {
+//         setEmployeeList([
+//             {
+//                 user_id: 1,
+//                 employee_code: "EMP001",
+//                 name: "John Doe",
+//                 designation_name: "Software Engineer",
+//                 date_of_joining: "2021-06-15",
+//                 status: "Active",
+//             },
+//             {
+//                 user_id: 2,
+//                 employee_code: "EMP002",
+//                 name: "Jane Smith",
+//                 designation_name: "Project Manager",
+//                 date_of_joining: "2019-03-10",
+//                 status: "Inactive",
+//             },
+//         ]);
+//     }, []);
+
+//     // PDF Generator Function
+//     const generatePDF = (employee = null) => {
+//         const doc = new jsPDF();
+//         doc.text("Employee Report", 14, 10);
+
+//         if (employee) {
+//             // ✅ Single Employee PDF
+//             autoTable(doc, {
+//                 head: [["Field", "Value"]],
+//                 body: [
+//                     ["Employee Code", employee.employee_code],
+//                     ["Name", employee.name],
+//                     ["Designation", employee.designation_name],
+//                     ["Joined Date", employee.date_of_joining],
+//                     ["Status", employee.status],
+//                 ],
+//             });
+//             doc.save(`${employee.name}_Employee.pdf`);
+//         } else {
+//             // ✅ Entire Table PDF
+//             autoTable(doc, {
+//                 head: [["EMP-CODE", "Name", "DESIGNATION", "JOINED DATE", "Status"]],
+//                 body: employeelist.map((emp) => [
+//                     emp.employee_code,
+//                     emp.name,
+//                     emp.designation_name,
+//                     emp.date_of_joining,
+//                     emp.status,
+//                 ]),
+//             });
+//             doc.save("Employee_List.pdf");
+//         }
+//     };
+
+//     // Table Columns
+//     const columns = [
+//         { name: "#", selector: (row, index) => index + 1, sortable: true },
+//         { name: "EMP-CODE", selector: (row) => row.employee_code, sortable: true },
+//         { name: "Name", selector: (row) => row.name, sortable: true },
+//         { name: "DESIGNATION", selector: (row) => row.designation_name, sortable: true },
+//         { name: "JOINED DATE", selector: (row) => row.date_of_joining, sortable: true },
+//         { name: "Status", selector: (row) => row.status, sortable: true },
+//         {
+//             name: (
+//                 <div className="d-flex align-items-center gap-2">
+//                     <span>Action</span>
+//                     <Button variant="primary" size="sm" onClick={() => generatePDF()}>
+//                         <FontAwesomeIcon icon={faFilePdf} className="me-1" />
+                       
+//                     </Button>
+//                 </div>
+//             ),
+//             cell: (row) => (
+//                 <div style={{ display: "flex", gap: "10px" }}>
+//                     <Button variant="warning" size="sm">
+//                         <FontAwesomeIcon icon={faEdit} />
+//                     </Button>
+//                     <Button variant="danger" size="sm">
+//                         <FontAwesomeIcon icon={faTrash} />
+//                     </Button>
+//                     <Button variant="secondary" size="sm" onClick={() => generatePDF(row)}>
+//                         <FontAwesomeIcon icon={faFilePdf} />
+//                     </Button>
+//                 </div>
+//             ),
+//             ignoreRowClick: true,
+//             allowOverflow: true,
+//             button: true,
+//         },
+//     ];
+    
+//     return (
+//         <div className=" mt-4">
+//             <div className="d-flex justify-content-between align-items-center mb-3">
+//                 <h4>Employee List</h4>
+//                 {/* <Button variant="primary" onClick={() => generatePDF()}>
+//                     <FontAwesomeIcon icon={faFilePdf} className="me-2" />
+//                     Download All
+//                 </Button> */}
+//             </div>
+
+//             <DataTable
+//                 columns={columns}
+//                 data={employeelist}
+//                 pagination
+//                 highlightOnHover
+//                 responsive
+//             />
+//         </div>
+//     );
+// }
+
+// export default EmployeeList;
+
