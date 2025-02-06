@@ -207,7 +207,7 @@ function AddEmployee() {
     };
 
     return (
-        <div className="d-flex justify-content-center align-items-center"
+        <div className="d-flex justify-content-center align-items-center" id="add-employees"
             style={{ height: "", backgroundColor: "#f8f9fa" }} >
 
             <div className="p-6 bg-white rounded-lg shadow mt-4"
