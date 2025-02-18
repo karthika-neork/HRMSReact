@@ -3,6 +3,8 @@ import axios from 'axios';
 import "../commonStyle/Login.css";
 import Captcha from '../components/CaptchaPage';
 import { FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 const LoginPage = () => {
     const [formData, setFormData] = useState({
         email: "",
@@ -33,7 +35,7 @@ const LoginPage = () => {
     //         console.error("Error fetching captcha:", error);
     //     }
     // };
-
+const navigate=useNavigate()
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -65,48 +67,47 @@ const LoginPage = () => {
             captcha: '',
             login: ''
         };
-
+    
         if (!email) {
             newErrors.email = 'Email is required.';
             isValid = false;
         }
-
+    
         if (!password) {
             newErrors.password = 'Password is required.';
             isValid = false;
         }
-
-        // Separate captcha validation from main form validation
+    
+        console.log("Captcha Input:", captchaInput);
+        console.log("Captcha Value:", captchaValue);
+    
+        // Ensure captcha validation is properly checking user input
         if (!captchaInput) {
             newErrors.captcha = 'Captcha is required.';
             isValid = false;
-        } else if (captchaInput !== captchaValue) {
+        } else if (captchaInput.trim().toLowerCase() !== captchaValue.trim().toLowerCase()) {
             newErrors.captcha = 'Captcha does not match.';
             isValid = false;
-            // Clear the captcha input state when there's a mismatch
-            setCaptchaInput('');
-            // Regenerate captcha on mismatch
+            setCaptchaInput(''); // Clear input if mismatched
             if (captchaRef.current) {
-                captchaRef.current.regenerateCaptcha();
+                captchaRef.current.regenerateCaptcha(); // Regenerate on mismatch
             }
         }
-
+    
         setFormErrors(newErrors);
         return isValid;
     };
-
+    
     // Handle form submission
-    const handleSubmit = async (e, event) => {
-        e.preventDefault();
-
-        const email = event.target.elements.inputEmailAddress.value.trim();
-        const password = event.target.elements.password.value.trim();
-
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const email = formData.email.trim();
+        const password = formData.password.trim();
+    
         // Preserve existing captcha error if it's a "does not match" error
         const existingCaptchaError = formErrors.captcha;
         resetErrors();
-
-        // If there was a captcha mismatch error, maintain it
+    
         if (existingCaptchaError === 'Captcha does not match.') {
             setFormErrors(prev => ({
                 ...prev,
@@ -114,18 +115,43 @@ const LoginPage = () => {
             }));
             return;
         }
-
+    
+        // Validate input fields
         if (!validateForm(email, password)) {
             return;
         }
-
+    
         try {
-            const response = await axios.post("/api/admin/login", formData);
-            // Handle success (e.g., redirect to dashboard)
-            console.log(response.data);
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+    
+            const response = await axios.post("https://hrms.neork.io/api/login", formData);
+    
+            if (response.data.status === "success") {
+                // Save user session details
+                // Redirect to home/dashboard
+                navigate('/home-layout');
+            } else {
+                // API returned an error (like invalid credentials)
+                setFormErrors(prev => ({
+                    ...prev,
+                    login: response.data.message || "Invalid email and/or password."
+                }));
+            }
         } catch (error) {
-            if (error.response && error.response.data.errors) {
-                setErrors(error.response.data.errors);
+            if (error.response?.status === 403) {
+                // Handle inactive account error
+                setFormErrors(prev => ({
+                    ...prev,
+                    login: error.response.data.message || "Your account is in an inactive state. Please contact the Admin."
+                }));
+            } else {
+                // Handle general login error
+                setFormErrors(prev => ({
+                    ...prev,
+                    login: 'Invalid email and/or password.'
+                }));
             }
         }
     };
