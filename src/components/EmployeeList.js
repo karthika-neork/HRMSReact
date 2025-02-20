@@ -255,66 +255,20 @@ function EmployeeList() {
         setShowAddComponent(true);
     };
 
-    // Handle the cancel or close action
-    //   const handleClose = () => {
-    //     setShowAddComponent(false);
-    //     setShowEmployeeList(true); // Show the table again
-    // };
+
 
     return (
         <div className="table-container" style={{ overflowX: 'hidden', overflowY: 'hidden', width: '100%', padding: '30px' }}>
-            {/* <FileUploadWithPreview/> */}
-            {/* {showAddComponent && <EmployeeAdd 
-                userId={userId} 
-                fetchEmployeesList={fetchEmployeesList} 
-                onClose={() => {
-                    setShowAddComponent(false);
-                    setShowEmployeeList(true); // Show the list when closing the form
-                }} 
-                mode={formMode} 
-                employeelist={selectedEmployee} 
-            />} */}
-
-            {/* {showEmployeeList && ( */}
             <>
-                <div className="title-head d-flex justify-content-between">
-                    <h6 className="mb-0 text-uppercase">EMPLOYEE LIST</h6>
-                </div>
-
-                <hr />
-
-                <div className="row">
-                    <div className="col-lg-12">
-                        <div className="btm-for mb-4 text-lg-end">
-                            <div className="ms-auto">
-                                <div className="btn-group">
-                                    <Button href='add-employees' className="btn template-btn px-5" onClick={handleAddPage}>
-                                        Add
-                                    </Button>
-                                </div>
-                            </div>
-                        </div> 
-                    </div>
-                </div>
+                   <div className="d-flex justify-content-between align-items-center mb-3 w-100">
+                <h5 className="text-uppercase fw-bold">EMPLOYEE LIST</h5>
+                <button className="btn btn-primary" onClick={handleAddPage}>
+                    <i className="fa fa-plus me-2"></i> Add Attendance
+                </button>
+            </div>
                 <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px' }}>
 
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div className="text-start ms-2">
-                            {/* <span>Show</span>
-                            <select
-                                className="mx-2"
-                                value={pageSize}
-                                onChange={(e) => changePageSize(Number(e.target.value))}
-                            >
-                                {pageSizeOptions.map((option) => (
-                                    <option key={option} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
-                            <span>entries</span> */}
-                        </div>
-
                         <div className="flex justify-center text-end mb-3 me-3" >
                             <input className='form-control' style={{ width: '100%' }}
                                 value={globalFilter}
