@@ -107,7 +107,6 @@ const LoginPage = () => {
         if (!validateForm(email, password)) {
             return;
         }
-
         try {
             const formData = new FormData();
             formData.append('email', email);
@@ -129,6 +128,8 @@ const LoginPage = () => {
                     login: response.data.message || "Invalid email and/or password."
                 }));
             }
+            console.log(response.data.token,"Token in sssssss");
+
         } catch (error) {
             if (error.response?.status === 403) {
                 // Handle inactive account error

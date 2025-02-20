@@ -11,6 +11,7 @@ import EmployeeDashboard from './components/EmployeeDashboardPage';
 import PolicyPage from './components/PolicyPage'
 import EmployeeHomePage from './components/EmployeeHomePage';
 import Footer from './components/Footer';
+import ResetPassword from './components/ResetPassword';
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/emp-home" element={<EmployeeHomePage />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
         <Footer />
       </Router>
