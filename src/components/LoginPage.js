@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import axios from 'axios';
+import axios from '../axiosConfig';
 import "../commonStyle/Login.css";
 import Captcha from '../components/CaptchaPage';
 import { FaEye } from "react-icons/fa";
@@ -25,18 +25,7 @@ const LoginPage = () => {
     const [captchaInput, setCaptchaInput] = useState('');
     const [captchaValue, setCaptchaValue] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
-
-    // Fetch a new captcha
-    // const fetchCaptcha = async () => {
-    //     try {
-    //         const response = await axios.get("/api/captcha");
-    //         setCaptchaImage(response.data.captcha);
-    //     } catch (error) {
-    //         console.error("Error fetching captcha:", error);
-    //     }
-    // };
-const navigate=useNavigate()
-
+    const navigate = useNavigate()
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
@@ -67,20 +56,20 @@ const navigate=useNavigate()
             captcha: '',
             login: ''
         };
-    
+
         if (!email) {
             newErrors.email = 'Email is required.';
             isValid = false;
         }
-    
+
         if (!password) {
             newErrors.password = 'Password is required.';
             isValid = false;
         }
-    
+
         console.log("Captcha Input:", captchaInput);
         console.log("Captcha Value:", captchaValue);
-    
+
         // Ensure captcha validation is properly checking user input
         if (!captchaInput) {
             newErrors.captcha = 'Captcha is required.';
@@ -93,21 +82,19 @@ const navigate=useNavigate()
                 captchaRef.current.regenerateCaptcha(); // Regenerate on mismatch
             }
         }
-    
+
         setFormErrors(newErrors);
         return isValid;
     };
-    
-    // Handle form submission
     const handleSubmit = async (event) => {
         event.preventDefault();
         const email = formData.email.trim();
         const password = formData.password.trim();
-    
+
         // Preserve existing captcha error if it's a "does not match" error
         const existingCaptchaError = formErrors.captcha;
         resetErrors();
-    
+
         if (existingCaptchaError === 'Captcha does not match.') {
             setFormErrors(prev => ({
                 ...prev,
@@ -115,7 +102,7 @@ const navigate=useNavigate()
             }));
             return;
         }
-    
+
         // Validate input fields
         if (!validateForm(email, password)) {
             return;
@@ -124,17 +111,15 @@ const navigate=useNavigate()
             const formData = new FormData();
             formData.append('email', email);
             formData.append('password', password);
-    
-            const response = await axios.post("https://hrms.neork.io/api/login", formData);
-    
-            if (response.data.status === "success") {
-                // Save user session details
-                sessionStorage.setItem('access_token', response.data.access_token);
-                sessionStorage.setItem('token', response.data.token);
-                sessionStorage.setItem('user_id', response.data.user_id);
-            
 
-                // Redirect to home/dashboard
+            const response = await axios.post("https://hrms.neork.io/api/login", formData);
+
+            if (response.data.status === 1) {
+                // Store data in sessionStorage
+                sessionStorage.setItem("access_token", response.data.access_token);
+                sessionStorage.setItem("token", response.data.token);
+                sessionStorage.setItem("user_id", response.data.user_id);
+                // Redirect to home-layout
                 navigate('/home-layout');
             } else {
                 // API returned an error (like invalid credentials)
@@ -162,9 +147,7 @@ const navigate=useNavigate()
         }
     };
 
-    // React.useEffect(() => {
-    //     fetchCaptcha();
-    // }, []);
+
     const handleCaptchaChange = ({ captcha, input }) => {
         setCaptchaInput(captcha);
         setCaptchaValue(input);
@@ -206,7 +189,7 @@ const navigate=useNavigate()
                             <label htmlFor="password" className="form-label ">Password</label>
                             <div className="input-group">
                                 <input
-                                   type={passwordVisible ? 'text' : 'password'}
+                                    type={passwordVisible ? 'text' : 'password'}
                                     id="password"
                                     name="password"
                                     className={`form-control ${errors.password ? "is-invalid" : ""}`}
@@ -215,7 +198,7 @@ const navigate=useNavigate()
                                     onChange={handleChange}
                                 />
                                 <button type="button" className="input-group-text" onClick={togglePasswordVisibility}>
-                                <FaEye/>
+                                    <FaEye />
                                 </button>
                             </div>
                             {errors.password && <span className="error-msg">{errors.password}</span>}
@@ -245,27 +228,27 @@ const navigate=useNavigate()
     )}
 </div> */}
 
-<div className="col-12 text-start mb-3">
-    <label htmlFor="captcha" className="form-label">Captcha</label>
-    <div className="captcha-wrapper">
-        <Captcha 
-            ref={captchaRef} 
-            onChange={handleCaptchaChange} 
-        />
-        <button style={{marginLeft:'-37px'}}
-            type="button" 
-            className="btn btn-primary d-flex align-items-center mb-" 
-            onClick={() => captchaRef.current && captchaRef.current.regenerateCaptcha()}
-        >
-             <i className="bi bi-arrow-clockwise ms-2"></i>
-        </button>
-    </div>
-    {formErrors.captcha && (
-        <div className="text-danger mt-1" style={{ fontSize: '0.875rem' }}>
-            {formErrors.captcha}
-        </div>
-    )}
-</div>
+                        <div className="col-12 text-start mb-3">
+                            <label htmlFor="captcha" className="form-label">Captcha</label>
+                            <div className="captcha-wrapper">
+                                <Captcha
+                                    ref={captchaRef}
+                                    onChange={handleCaptchaChange}
+                                />
+                                <button style={{ marginLeft: '-37px' }}
+                                    type="button"
+                                    className="btn btn-primary d-flex align-items-center mb-"
+                                    onClick={() => captchaRef.current && captchaRef.current.regenerateCaptcha()}
+                                >
+                                    <i className="bi bi-arrow-clockwise ms-2"></i>
+                                </button>
+                            </div>
+                            {formErrors.captcha && (
+                                <div className="text-danger mt-1" style={{ fontSize: '0.875rem' }}>
+                                    {formErrors.captcha}
+                                </div>
+                            )}
+                        </div>
 
                         {errors.captcha && <span className="error-msg">{errors.captcha}</span>}
                         <div className="form-check my-4 " style={{ display: 'flex', alignItems: 'center' }}>

@@ -19,9 +19,9 @@ function MyAttendance() {
 
     // table 
     const columns = [
-        { name: "SI No", selector: (row, index) => index + 1, sortable: false }, 
+        { name: "SI No", selector: (row, index) => index + 1, sortable: false },
         { name: "Date", selector: (row) => row.date, sortable: true },
-        { name: "Punch In Time", selector: (row) => row.punchIn ,sortable: true},
+        { name: "Punch In Time", selector: (row) => row.punchIn, sortable: true },
         { name: "Punch Out Time", selector: (row) => row.punchOut },
         { name: "Total Working Hours", selector: (row) => row.workingHours },
         { name: "Break Hours", selector: (row) => row.breakHours },
@@ -127,74 +127,66 @@ function MyAttendance() {
     };
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-
-            <div className="title-head d-flex justify-content-between">
-                <h6 className="mb-0 text-uppercase">My Attendance List</h6>
-            </div>
-            <hr />
-
-            <div className="d-flex align-items-center justify-content-end mb-3 me-4">
-                <button
-                    className="btn btn-primary"
-                    data-bs-toggle=""
-                    data-bs-target="#attendanceOffcanvas"
-                    onClick={handleAddAttendance}
-                >
-                    Add Attendance
+        <div className="container-fluid mt-5 w-100">
+            <div className="d-flex justify-content-between align-items-center mb-3 w-100">
+                <h5 className="text-uppercase fw-bold">My Attendance List</h5>
+                <button className="btn btn-primary" onClick={handleAddAttendance}>
+                    <i className="fa fa-plus me-2"></i> Add Attendance
                 </button>
             </div>
 
-            <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)' }}>
-                <div className="container-fluid p-">
-                    <DataTable columns={columns} data={data} pagination={true} />
-                </div>
+            <div className="card shadow-sm border-0 p-3 w-100">
+                <DataTable columns={columns} data={data} pagination responsive className="w-100" />
             </div>
 
-            {/* Offcanvas Form */}
-            <div className="offcanvas offcanvas-end" id="attendanceSidebar">
-                <div className="offcanvas-header" style={{ backgroundColor: '#0047bb', color: 'white' }}>
+            {/* Offcanvas Sidebar */}
+            <div className="offcanvas offcanvas-end" id="attendanceSidebar" tabIndex="-1" aria-labelledby="attendanceSidebarLabel">
+                {/* Header */}
+                <div className="offcanvas-header text-white" style={{ backgroundColor: "#0047bb" }}>
                     <h5 className="offcanvas-title">{formMode === "add" ? "Add My Attendance" : "Edit My Attendance"}</h5>
-                    <button type="button" className="btn-close" onClick={closeSidebar} aria-label="Close">
+                    <button type="button" className="btn-close text-white" onClick={closeSidebar}>
                         <i className="fa fa-close"></i>
                     </button>
                 </div>
-                <div className="offcanvas-body">
-                    <form onSubmit={handleFormSubmit}>
+
+                {/* Offcanvas Body - Scrollable Form */}
+                <div className="offcanvas-body d-flex flex-column">
+                    <form className="flex-grow-1">
                         <div className="mb-3">
-                            <label className="form-label">Date <span className="text-danger">*</span></label>
+                            <label className="form-label fw-bold">Date <span className="text-danger">*</span></label>
                             <input type="date" className="form-control" name="date" value={formData.date} onChange={handleInputChange} />
                             {errors.date && <small className="text-danger">{errors.date}</small>}
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Punch In Time <span className="text-danger">*</span></label>
+                            <label className="form-label fw-bold">Punch In Time <span className="text-danger">*</span></label>
                             <input type="time" className="form-control" name="punchIn" value={formData.punchIn} onChange={handleInputChange} />
                             {errors.punchIn && <small className="text-danger">{errors.punchIn}</small>}
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Punch Out Time <span className="text-danger">*</span></label>
+                            <label className="form-label fw-bold">Punch Out Time <span className="text-danger">*</span></label>
                             <input type="time" className="form-control" name="punchOut" value={formData.punchOut} onChange={handleInputChange} />
                             {errors.punchOut && <small className="text-danger">{errors.punchOut}</small>}
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Reason <span className="text-danger">*</span></label>
-                            <textarea type="text" className="form-control" name="reason" value={formData.reason} onChange={handleInputChange} />
+                            <label className="form-label fw-bold">Reason <span className="text-danger">*</span></label>
+                            <textarea className="form-control" name="reason" value={formData.reason} onChange={handleInputChange} />
                             {errors.reason && <small className="text-danger">{errors.reason}</small>}
-                        </div>       
-                        <div className="mt-4 text-end">
-                            <button type="submit" className="btn btn-primary me-2">
-                                {formMode === "add" ? "Save" : "Update"}
-                            </button>
-                            <button type="button" className="btn btn-danger" onClick={closeSidebar}>
-                                Cancel
-                            </button>
- 
                         </div>
                     </form>
                 </div>
-            </div>
 
+                {/* Footer with Buttons at the Bottom */}
+                <div className="offcanvas-footer p-3 bg-light border-top">
+                    <button type="submit" className="btn btn-primary me-2 " onClick={handleFormSubmit}>
+                        {formMode === "add" ? "Save" : "Update"}
+                    </button>
+                    <button type="button" className="btn btn-danger" onClick={closeSidebar}>
+                        Cancel
+                    </button>
+                </div>
+            </div>
         </div>
+
     )
 }
 
