@@ -152,110 +152,66 @@ const Header = ({ defaultSection = "Employees" }) => {
 
   return (
     <div>
-      <div className="header-wrapper">
-        <div className="header-content">
-          {/* Left section */}
-          <div className="header-left">
-            <div className="logo">
-              <img
-                src="https://i.postimg.cc/13MWDfQC/logo-white.png"
-                alt=""
-                style={{ width: '100px', height: 'auto' }}
-              />
-            </div>
-            <div className="search-container ms-5">
-              <input
-                type="text"
-                placeholder="Search"
-                className="search-input"
-              />
-              <FaSearch className="search-icon" />
+    <div className="py-2 px-3 shadow-sm" style={{ backgroundColor: "#0047bb", color: "white" }}>
+        <div className="container-fluid d-flex justify-content-between align-items-center">
+
+          {/* Left Section */}
+          <div className="d-flex align-items-center">
+            <img src="https://i.postimg.cc/13MWDfQC/logo-white.png" alt="Logo" className="me-3" style={{ width: "100px" }} />
+            <div className="input-group">
+              <input type="text" className="form-control" placeholder="Search" />
+              <span className="input-group-text bg-light">
+                <FaSearch className="text-secondary" />
+              </span>
             </div>
           </div>
 
-          <div className="header-right">
-            {/* Settings Dropdown */}
-            <div className="dropdown-container" ref={settingsRef}>
-              <Dropdown
-                show={showSettings}
-                onToggle={(isOpen) => setShowSettings(isOpen)}
-              >
-                <Dropdown.Toggle bsPrefix="custom-dropdown-toggle" className="icon-btn">
-                  <FaCog className="icon" onClick={() => setShowSettings(!showSettings)} />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => handleDropdownClick("Masters")}>
-                    Masters
-                  </Dropdown.Item>
-                  <Dropdown.Item onClick={() => handleDropdownClick("Employees")}>
-                    Employees
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    onClick={() => handleDropdownClick("Notifications")}
-                    className="dropdown-item"
-                  >
-                    Notification
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    onClick={() => handleDropdownClick("Policy")}
-                    className="dropdown-item"
-                  >
-                    Policy
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    onClick={() => handleDropdownClick("Holiday")}
-                    className="dropdown-item"
-                  >
-                    Holiday
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
+          {/* Right Section */}
+          <div className="d-flex align-items-center">
 
-            </div>
+            {/* Settings Dropdown */}
+            <Dropdown show={showSettings} onToggle={setShowSettings} ref={settingsRef} className="me-3">
+              <Dropdown.Toggle variant="link" className="text-white p-0 border-0">
+                <FaCog size={20} />
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="dropdown-menu-end">
+                <Dropdown.Item onClick={() => handleDropdownClick("Masters")}>Masters</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleDropdownClick("Employees")}>Employees</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleDropdownClick("Notifications")}>Notifications</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleDropdownClick("Policy")}>Policy</Dropdown.Item>
+                <Dropdown.Item onClick={() => handleDropdownClick("Holiday")}>Holiday</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+
             {/* Notifications Dropdown */}
-            <div className="dropdown-container" ref={notificationRef}>
-              <Dropdown
-                show={showNotifications}
-                onToggle={(isOpen) => setShowNotifications(isOpen)}
-              >
-                <Dropdown.Toggle bsPrefix="custom-dropdown-toggle" className="icon-btn">
-                  <FaBell
-                    className="icon"
-                    onClick={() => setShowNotifications(!showNotifications)}
-                  />
-                  <span className="notification-badge">0</span>
-                </Dropdown.Toggle>
-                <Dropdown.Menu className="notifications-menu">
-                  <Dropdown.Header>Notifications</Dropdown.Header>
-                  <p>No new notifications</p>
-                  <Dropdown.Item className="notification-item" onClick={() => handleDropdownClick("Notifications")}>
-                    <button className="btn btn-primary">View All Message</button>
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
+            <Dropdown show={showNotifications} onToggle={setShowNotifications} ref={notificationRef} className="me-3 position-relative">
+              <Dropdown.Toggle variant="link" className="text-white p-0 border-0 position-relative">
+                <FaBell size={20} />
+                <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">0</span>
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="dropdown-menu-end">
+                <Dropdown.Header>Notifications</Dropdown.Header>
+                <p className="text-center m-2">No new notifications</p>
+                <Dropdown.Item className="text-center">
+                  <button className="btn btn-primary w-100">View All</button>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
 
             {/* Profile Dropdown */}
-            <div className="dropdown-container" ref={profileRef}>
-              <div
-                className="profile-container"
-                onClick={() => setShowProfile(!showProfile)}
-              >
-                <div className="avatar"></div>
-                <span className="username">Super Admin</span>
-              </div>
-              {showProfile && (
-                <div className="dropdown-menu profile-menu">
-                  <div
-                    className="dropdown-item logout-item"
-                    onClick={handleLogout}
-                  >
-                    <FaSignOutAlt className="logout-icon" />
-                    Logout
-                  </div>
-                </div>
-              )}
+            <div className="d-flex align-items-center cursor-pointer" ref={profileRef} onClick={() => setShowProfile(!showProfile)}>
+              <div className="rounded-circle bg-secondary me-2" style={{ width: "35px", height: "35px" }}></div>
+              <span className="fw-bold">Super Admin</span>
             </div>
+            {showProfile && (
+              <div className="dropdown-menu dropdown-menu-end show mt-2">
+                <div className="dropdown-item text-danger d-flex align-items-center" onClick={handleLogout}>
+                  <FaSignOutAlt className="me-2" />
+                  Logout
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
