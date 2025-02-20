@@ -120,7 +120,6 @@ const navigate=useNavigate()
         if (!validateForm(email, password)) {
             return;
         }
-    
         try {
             const formData = new FormData();
             formData.append('email', email);
@@ -130,6 +129,11 @@ const navigate=useNavigate()
     
             if (response.data.status === "success") {
                 // Save user session details
+                sessionStorage.setItem('access_token', response.data.access_token);
+                sessionStorage.setItem('token', response.data.token);
+                sessionStorage.setItem('user_id', response.data.user_id);
+            
+
                 // Redirect to home/dashboard
                 navigate('/home-layout');
             } else {
@@ -139,6 +143,8 @@ const navigate=useNavigate()
                     login: response.data.message || "Invalid email and/or password."
                 }));
             }
+            console.log(response.data.token,"Token in sssssss");
+
         } catch (error) {
             if (error.response?.status === 403) {
                 // Handle inactive account error
