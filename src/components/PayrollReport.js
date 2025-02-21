@@ -122,114 +122,14 @@ const PayrollReport = () => {
       )
     },
   ];
-
-
-  // PDF Generator Function
-  // const generatePDF = async (formdata = null) => {
-  //   const doc = new jsPDF();
-  
-  //   const imgUrl = "https://i.postimg.cc/xdr6DCmg/neork-logo-200.png";
-  //   const imgWidth = 40;
-  //   const imgHeight = 20;
-  
-  //   // Add Image to PDF
-  //   try {
-  //     const imgData = await getBase64ImageFromUrl(imgUrl);
-  //     doc.addImage(imgData, "PNG", 150, 10, imgWidth, imgHeight);
-  //   } catch (error) {
-  //     console.error("Error loading image:", error);
-  //   }
-  
-  //   doc.text("Payroll Report", 14, 30);
-  
-  //   if (formdata) {
-  //     // Generate single row PDF
-  //     autoTable(doc, {
-  //       startY: 40,
-  //       head: [["Field", "Value"]],
-  //       body: [
-  //         ["EMP-CODE", formdata.empCode],
-  //         ["Name", formdata.name],
-  //         ["Designation", formdata.designation],
-  //         ["TMD", formdata.tmd],
-  //         ["TWD", formdata.twd],
-  //         ["GS", formdata.gs],
-  //         ["Basic", formdata.basic],
-  //         ["DA", formdata.da],
-  //         ["HRA", formdata.hra],
-  //         ["MA", formdata.medicalAllowance],
-  //         ["CA", formdata.conveyanceAllowance],
-  //         ["EA", formdata.entertainmentAllowance],
-  //         ["EDU", formdata.educationAllowance],
-  //         ["SA", formdata.specialAllowance],
-  //         ["OT", formdata.overtimeAllowance],
-  //         ["LOP", formdata.lop],
-  //         ["Deductions", formdata.totalDeductions],
-  //         ["Net Salary", formdata.netSalary],
-  //       ],
-  //     });
-  //     doc.save(`${formdata.name}_Payroll.pdf`);
-  //   } else {
-  //     // Generate complete table PDF
-  //     autoTable(doc, {
-  //       startY: 40,
-  //       head: [
-  //         [
-  //           "#",
-  //           "EMP-CODE",
-  //           "NAME",
-  //           "DESIGNATION",
-  //           "TMD",
-  //           "TWD",
-  //           "GS",
-  //           "BASIC",
-  //           "DA",
-  //           "HRA",
-  //           "MA",
-  //           "CA",
-  //           "EA",
-  //           "EDU",
-  //           "SA",
-  //           "OT",
-  //           "LOP",
-  //           "DEDUCTIONS",
-  //           "NET SALARY",
-  //         ],
-  //       ],
-  //       body: data.map((row) => [
-  //         row.id,
-  //         row.empCode,
-  //         row.name,
-  //         row.designation,
-  //         row.tmd,
-  //         row.twd,
-  //         row.gs,
-  //         row.basic,
-  //         row.da,
-  //         row.hra,
-  //         row.medicalAllowance,
-  //         row.conveyanceAllowance,
-  //         row.entertainmentAllowance,
-  //         row.educationAllowance,
-  //         row.specialAllowance,
-  //         row.overtimeAllowance,
-  //         row.lop,
-  //         row.totalDeductions,
-  //         row.netSalary,
-  //       ]),
-        
-  //     });
-  //     doc.save("Payroll_Report.pdf");
-  //   }
-  // };
   const generatePDF = async (formdata = null) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth(); // Get page width dynamically
-  
+
     const imgUrl = "https://i.postimg.cc/xdr6DCmg/neork-logo-200.png";
     const imgWidth = 25; // Reduced width
     const imgHeight = 15; // Reduced height
-  
+
     // Add Image to PDF (Top-left corner with spacing)
     try {
       const imgData = await getBase64ImageFromUrl(imgUrl);
@@ -237,12 +137,12 @@ const PayrollReport = () => {
     } catch (error) {
       console.error("Error loading image:", error);
     }
-  
+
     // Add Centered Title with more margin from the image
     const title = "Payroll Report";
     const textWidth = doc.getTextWidth(title);
     doc.text(title, (pageWidth - textWidth) / 2, 35); // Added more spacing below the image
-  
+
     if (formdata) {
       // Generate single row PDF
       autoTable(doc, {
@@ -290,7 +190,7 @@ const PayrollReport = () => {
   };
 
 
-  
+
   const getBase64ImageFromUrl = async (imageUrl) => {
     const response = await fetch(imageUrl);
     const blob = await response.blob();
@@ -301,7 +201,7 @@ const PayrollReport = () => {
       reader.readAsDataURL(blob);
     });
   };
-  
+
   const data = [
     {
       id: 1, empCode: 'sl12', name: 'Abhijith S', designation: 'Junior Tester',
@@ -357,51 +257,57 @@ const PayrollReport = () => {
 
   return (
     <div className="p-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <div className="row align-items-center">
-          <div className="col-md-6">
-            <h1 className="text-xl font-bold">PAYROLE LIST</h1>
-          </div>
-          <hr />
-          <div className="d-flex justify-content-end align-items-center mb-3">
-  <div className="d-flex align-items-center gap-3">
-    <select className=" form-select rounded-md">
-      <option>January</option>
-      <option>February</option>
-      <option>March</option>
-      <option>April</option>
-      <option>May</option>
-      <option>June</option>
-      <option>July</option>
-      <option>August</option>
-      <option>September</option>
-      <option>October</option>
-      <option>November</option>
-      <option>December</option>
-    </select>
-    <select className="px-4 py-2 form-select">
-      <option>2025</option>
-      <option>2026</option>
-      <option>2027</option>
-      <option>2028</option>
-      <option>2029</option>
-      <option>2030</option>
-      <option>2031</option>
-      <option>2032</option>
-      <option>2033</option>
-      <option>2034</option>
-      <option>2035</option>
-    </select>
-    <button className="btn btn-primary px-4 py-2">
-      Search
-    </button>
-    <button className="btn btn-outline-secondary px-4 py-2" style={{ whiteSpace: "nowrap" }}>
-      Clear Filter
-    </button>
-  </div>
-</div>
-        </div>
+      <div className="container-fluid">
+        <div className="row align-items-center justify-content-between mb-4">
 
+          {/* Left Column - Heading */}
+          <div className="col-12 col-md-6">
+            <h5 className="text-uppercase fw-bold">PAYROLL LIST</h5>
+          </div>
+
+          {/* Right Column - Filters (Dropdowns in a single row inside the column) */}
+          <div className="col-12 col-md-6">
+            <div className="d-flex flex-wrap justify-content-end align-items-center gap-2 gap-md-3">
+              <select className="form-select form-select-sm w-auto">
+                <option>January</option>
+                <option>February</option>
+                <option>March</option>
+                <option>April</option>
+                <option>May</option>
+                <option>June</option>
+                <option>July</option>
+                <option>August</option>
+                <option>September</option>
+                <option>October</option>
+                <option>November</option>
+                <option>December</option>
+              </select>
+
+              <select className="form-select form-select-sm w-auto">
+                <option>2025</option>
+                <option>2026</option>
+                <option>2027</option>
+                <option>2028</option>
+                <option>2029</option>
+                <option>2030</option>
+                <option>2031</option>
+                <option>2032</option>
+                <option>2033</option>
+                <option>2034</option>
+                <option>2035</option>
+              </select>
+
+              <button className="btn btn-primary btn-sm">
+                Search
+              </button>
+
+              <button className="btn btn-outline-secondary btn-sm" style={{ whiteSpace: "nowrap" }}>
+                Clear Filter
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">

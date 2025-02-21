@@ -144,7 +144,6 @@ const AttendanceTable = () => {
             <div className="title-head d-flex justify-content-between">
                 <h6 className="mb-0 text-uppercase">Attendance List</h6>
             </div>
-            <hr />
 
             <div className="d-flex align-items-center justify-content-end mb-3 gap-4">
                 <input type="date" className="form-control me-2" style={{ maxWidth: '150px' }} />

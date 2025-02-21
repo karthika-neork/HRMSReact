@@ -112,7 +112,7 @@ const LoginPage = () => {
             formData.append('email', email);
             formData.append('password', password);
 
-            const response = await axios.post("https://hrms.neork.io/api/login", formData);
+            const response = await axios.post("/login", formData);
 
             if (response.data.status === 1) {
                 // Store data in sessionStorage

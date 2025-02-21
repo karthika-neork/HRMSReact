@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "../commonStyle/EmployeeDashboard.css";
 import axios from '../axiosConfig';
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
@@ -9,66 +9,120 @@ import { Clock, PlayCircle, PauseCircle, TimerOff } from 'lucide-react';
 function EmployeeDashboard() {
 
   const currentDate = new Date().toLocaleDateString();
-  const attendanceData = []; // Simulated attendance data
-
   const [isPunchedIn, setIsPunchedIn] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
   const [punchInTime, setPunchInTime] = useState(null);
   const [punchOutTime, setPunchOutTime] = useState(null);
-  const handlePunch = () => {
-    if (isPunchedIn) {
-      setPunchOutTime(new Date());
-    } else {
-      setPunchInTime(new Date());
-      setPunchOutTime(null);
+  const [loading, setLoading] = useState(false);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [userAttendance, setUserAttendance] = useState(null);
+
+  const handlePunch = async () => {
+    const token = sessionStorage.getItem('token');
+    const userId = sessionStorage.getItem('user_id');
+
+    if (!token || !userId) {
+      alert('User not authenticated');
+      return;
     }
-    setIsPunchedIn(!isPunchedIn);
-    setOnBreak(false); // Reset break status when punching out
+
+    const url = isPunchedIn
+      ? '/punch-out'
+      : '/punch-in';
+
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: url,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId
+        }
+      });
+      if (isPunchedIn) {
+        setPunchOutTime(new Date());
+      } else {
+        setPunchInTime(new Date());
+        setPunchOutTime(null);
+      }
+      setIsPunchedIn(!isPunchedIn);
+      setOnBreak(false);
+    } catch (error) {
+      console.error('Error:', error);
+      // Axios provides error.response for server errors
+      const errorMessage = error.response?.data?.message || 'Failed to punch in/out';
+      alert(errorMessage);
+    }
   };
 
 
+  const handleBreak = async () => {
+    if (loading) return; // Prevent multiple requests
+    setLoading(true);
 
-  // const handlePunch = async () => {
-  //   const token = sessionStorage.getItem('token');
-  //   const userId = sessionStorage.getItem('user_id');
+    const token = sessionStorage.getItem("token");
+    const userId = sessionStorage.getItem("user_id");
 
-  //   if (!token || !userId) {
-  //     alert('User not authenticated');
-  //     return;
-  //   }
+    const apiUrl = onBreak
+      ? "/break-end-hours"
+      : "/break-start-hours";
 
-  //   const url = isPunchedIn
-  //     ? 'https://hrmstest.neork.io/api/punch-out'
-  //     : 'https://hrmstest.neork.io/api/punch-in';
+    try {
+      await axios.post(
+        apiUrl,
+        {}, // Empty body, since it's a POST request
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            userId: userId,
+          },
+        }
+      );
 
-  //   try {
-  //     const response = await axios({
-  //       method: 'POST',
-  //       url: url,
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`,
-  //         'Content-Type': 'application/json',
-  //         'userId': userId
-  //       }
-  //     });
-  //     if (isPunchedIn) {
-  //       setPunchOutTime(new Date());
-  //     } else {
-  //       setPunchInTime(new Date());
-  //       setPunchOutTime(null);
-  //     }
-  //     setIsPunchedIn(!isPunchedIn);
-  //     setOnBreak(false);
-  //   } catch (error) {
-  //     console.error('Error:', error);
-  //     // Axios provides error.response for server errors
-  //     const errorMessage = error.response?.data?.message || 'Failed to punch in/out';
-  //     alert(errorMessage);
-  //   }
-  // };
-  const handleBreak = () => {
-    setOnBreak(!onBreak);
+      // Toggle break state if API call is successful
+      setOnBreak(!onBreak);
+    } catch (error) {
+      console.error("Error handling break:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      const token = sessionStorage.getItem("token");
+      const userId = sessionStorage.getItem("user_id");
+
+      if (!token || !userId) {
+        console.error("Token or User ID is missing");
+        return;
+      }
+
+      try {
+        const response = await axios.get("/get-work-and-break-time", {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'userId': userId
+          },
+        });
+
+        console.log(response, "API Response"); // Debugging
+        // setAttendanceData(response.data); // Assuming API returns an array
+        // console.log(response.data, "API Response"); // Debugging
+        setAttendanceData(response.data.data.Attendance);
+        setUserAttendance(response.data.data.UserAttendance);
+      } catch (error) {
+        console.error("Error fetching attendance data:", error);
+      }
+    };
+
+    fetchAttendance();
+  }, []);
+
   const holidays = [
     { id: 1, day: 'Wednesday', date: 'January 01, 2025', name: 'New Year' },
     { id: 2, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
@@ -184,10 +238,12 @@ function EmployeeDashboard() {
                       left: '50%',
                       transform: 'translate(-50%, -50%)'
                     }}>
-                      <div className="text-center">
-                        <h3 className="mb-0">{loggedHours.toFixed(1)}</h3>
-                        <small className="text-muted">hours logged</small>
-                      </div>
+                      {userAttendance && (
+                        <div className="text-center">
+                          <h3 className="mb-0">{userAttendance.total_working_hours}</h3>
+                          <small className="text-muted">hours logged</small>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-center mt-2 text-muted">
@@ -231,16 +287,18 @@ function EmployeeDashboard() {
               </div>
 
               {/* Statistics Section */}
-              <div className="row mt-4 bg-light rounded mx-0 py-3">
-                <div className="col-6 text-center">
-                  <small className="text-muted d-block">Break Hours</small>
-                  <span className="fs-5 text-warning fw-bold">0.5 hrs</span>
+              {userAttendance && (
+                <div className="row mt-4 bg-light rounded mx-0 py-3">
+                  <div className="col-6 text-center">
+                    <small className="text-muted d-block">Break Hours</small>
+                    <span className="fs-5 text-warning fw-bold">{userAttendance.break_hours}</span>
+                  </div>
+                  <div className="col-6 text-center">
+                    <small className="text-muted d-block">Overtime</small>
+                    <span className="fs-5 text-danger fw-bold">{userAttendance.extra_hours}</span>
+                  </div>
                 </div>
-                <div className="col-6 text-center">
-                  <small className="text-muted d-block">Overtime</small>
-                  <span className="fs-5 text-danger fw-bold">1.2 hrs</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -280,8 +338,55 @@ function EmployeeDashboard() {
         </div>
       </div>
       <div className="row d-flex justify-content-center mt-5">
-        <div class="col-md-6">
-          <div className="card bg-white shadow-sm rounded p-3 w-100" style={{ height: '446px' }}>
+        <div className="col-md-6">
+          <div className="card bg-white shadow-sm rounded p-3 w-100" style={{ height: "450px" }}>
+            <h5 className="fw-bold text-dark mb-3 d-flex align-items-center card-titler">
+              <FaClock className="me-2" size={20} /> Today's Activity
+            </h5>
+
+            {/* Scrollable Attendance List */}
+            <div style={{ maxHeight: "350px", overflowY: "auto" }}>
+              <ul className="list-group list-group-flush">
+                {attendanceData.length > 0 ? (
+                  attendanceData.map((attendance, index) => (
+                    <li key={index} className="list-group-item d-flex align-items-center">
+                      {attendance.status === "punch_in" ? (
+                        <>
+                          <FaSignInAlt className="text-success me-3" size={20} />
+                          <div>
+                            <p className="mb-0 fw-semibold">Punch In at</p>
+                            <p className="text-muted small">
+                              {attendance.punch_in_time
+                                ? new Date(attendance.punch_in_time).toLocaleTimeString()
+                                : "N/A"}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <FaSignOutAlt className="text-danger me-3" size={20} />
+                          <div>
+                            <p className="mb-0 fw-semibold">Punch Out at</p>
+                            <p className="text-muted small">
+                              {attendance.punch_out_time
+                                ? new Date(attendance.punch_out_time).toLocaleTimeString()
+                                : "N/A"}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </li>
+                  ))
+                ) : (
+                  <li className="list-group-item text-muted text-center">No activity recorded today.</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="col-md-6">
+          <div className="card bg-white shadow-sm rounded p-3 w-100" style={{ height: "450px" }}>
             <h5 className="fw-bold text-dark mb-3 d-flex align-items-center card-titler">
               <FaClock className="me-2" size={20} /> Today's Activity
             </h5>
@@ -295,7 +400,9 @@ function EmployeeDashboard() {
                         <div>
                           <p className="mb-0 fw-semibold">Punch In at</p>
                           <p className="text-muted small">
-                            {new Date(attendance.punch_in_time).toLocaleTimeString()}
+                            {attendance.punch_in_time
+                              ? new Date(attendance.punch_in_time).toLocaleTimeString()
+                              : "N/A"}
                           </p>
                         </div>
                       </>
@@ -305,7 +412,9 @@ function EmployeeDashboard() {
                         <div>
                           <p className="mb-0 fw-semibold">Punch Out at</p>
                           <p className="text-muted small">
-                            {new Date(attendance.punch_out_time).toLocaleTimeString()}
+                            {attendance.punch_out_time
+                              ? new Date(attendance.punch_out_time).toLocaleTimeString()
+                              : "N/A"}
                           </p>
                         </div>
                       </>
@@ -313,14 +422,11 @@ function EmployeeDashboard() {
                   </li>
                 ))
               ) : (
-                <li className="list-group-item text-muted text-center">
-                  No activity recorded today.
-                </li>
+                <li className="list-group-item text-muted text-center">No activity recorded today.</li>
               )}
             </ul>
           </div>
-
-        </div>
+        </div> */}
         <div className="col-md-6">
           <div className="card border shadow-sm w-100">
             <div className="card-header bg-white py-3">
