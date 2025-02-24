@@ -1,6 +1,13 @@
 .stepper-container {
     margin: 30px 0;
     position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #b7cde6 #f1f1f1;
 }
 
 .step-wrapper {
@@ -9,8 +16,43 @@
     justify-content: space-between;
     margin-bottom: 20px;
     position: relative;
+    width: 100%;
+    max-width: 900px;
 }
 
+/* Enable scrolling on smaller screens */
+@media (max-width: 1024px) {
+    .stepper-container {
+        overflow-x: scroll;
+        scroll-behavior: smooth;
+    }
+
+    .step-wrapper {
+        width: max-content;
+    }
+
+    .step-item {
+        flex: 0 0 auto;
+        min-width: 120px;
+        margin-right: 20px;
+    }
+
+    /* Custom scrollbar */
+    .stepper-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .stepper-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .stepper-container::-webkit-scrollbar-thumb {
+        background: #b7cde6;
+        border-radius: 4px;
+    }
+}
+
+/* Step item */
 .step-item {
     position: relative;
     display: flex;
@@ -19,22 +61,23 @@
     flex: 1;
 }
 
-/* The connecting line (default state) */
-.step-line {
-    position: absolute;
+/* ✅ Main connecting line (Only on big screens) */
+.step-item:not(:first-child)::before {
     content: "";
-    height: 2px;
-    width: 100%;
-    background-color: #b7cde6; /* Light gray for inactive lines */
+    position: absolute;
     top: 15px;
-    left: -50%;
+    left: -60%;
+    width: 100%;
+    height: 2px;
+    background-color: #b7cde6;
     z-index: 1;
     transition: background-color 0.3s ease;
 }
 
-/* Active state for the line */
-.step-line.active {
-    background-color: #0047bb; /* Blue for active or completed lines */
+/* ✅ Updates correctly when active/completed */
+.step-item.completed:not(:first-child)::before,
+.step-item.active:not(:first-child)::before {
+    background-color: #0047bb;
 }
 
 /* Circles */
@@ -42,7 +85,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #b3c9e3; /* Default light gray */
+    background-color: #b3c9e3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,12 +95,17 @@
     transition: all 0.3s ease;
 }
 
+/* ✅ Removed unwanted extra lines inside the circle */
+.step-circle::after {
+    content: none !important;
+}
+
 .step-circle.active {
-    background-color: #0047bb; /* Blue for active step */
+    background-color: #0047bb;
 }
 
 .step-circle.completed {
-    background-color: #0047bb; /* Blue for completed steps */
+    background-color: #0047bb;
 }
 
 /* Text */
@@ -65,14 +113,71 @@
     margin-top: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #6c757d; /* Default gray */
+    color: #6c757d;
     text-align: center;
 }
 
 .step-text.active {
-    color: #007bff; /* Blue for active step */
+    color: #007bff;
 }
 
 .step-text.completed {
-    color: #007bff; /* Blue for completed steps */
+    color: #007bff;
+}
+
+/* ✅ FIXED: No unwanted extra lines in small screens */
+@media (max-width: 768px) {
+    .stepper-container {
+        margin: 30px 20px;
+    }
+
+    .step-wrapper {
+        flex-direction: row;
+        display: flex;
+        overflow-x: scroll;
+        width: max-content;
+    }
+
+    .step-item {
+        flex-direction: column;
+        width: auto;
+        min-width: 100px;
+        margin-right: 20px;
+    }
+
+    .step-text {
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    /* Custom scrollbar */
+    .stepper-container::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    /* ❌ Removed unwanted extra lines */
+    .step-item:not(:last-child)::after {
+        display: none;
+    }
+}
+
+/* iPad adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stepper-container {
+        margin: 30px 40px;
+    }
+
+    .step-text {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .stepper-container {
+        margin: 20px 10px;
+    }
+
+    .step-text {
+        font-size: 12px;
+    }
 }
