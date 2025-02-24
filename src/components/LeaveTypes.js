@@ -363,9 +363,6 @@ function LeaveTypes() {
                     <AgGridReact
                         rowData={leavetypes}
                         columnDefs={columns}
-                        // pagination={true}
-                        // paginationPageSize={pageSize}
-                        // onPaginationChanged={(params) => onPageChanged(params.api.paginationGetCurrentPage())}
                         domLayout='autoHeight'
                         onGridReady={(params) => {
                             params.api.sizeColumnsToFit();
