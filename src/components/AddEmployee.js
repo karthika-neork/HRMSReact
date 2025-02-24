@@ -237,21 +237,28 @@ function AddEmployee() {
                             const isActive = step === index + 1;
 
                             return (
-                                <div key={index}
-                                    className={`step-item ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""}`} >
-
+                                <div
+                                    key={index}
+                                    className={`step-item ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""}`}
+                                >
                                     {/* The connecting line */}
                                     {index !== 0 && (
-                                        <div className={`step-line ${isLineActive(index) ? "active" : ""}`} ></div>
+                                        <div
+                                            className={`step-line ${isLineActive(index) ? "active" : ""}`}
+                                        ></div>
                                     )}
 
                                     {/* The circle */}
-                                    <div className={`step-circle ${isCompleted ? "completed" : isActive ? "active" : ""}`}>
+                                    <div
+                                        className={`step-circle ${isCompleted ? "completed" : isActive ? "active" : ""}`}
+                                    >
                                         <span className="text-white"></span>
                                     </div>
 
                                     {/* The label */}
-                                    <span className={`step-text ${isCompleted ? "completed" : isActive ? "active" : ""}`} >
+                                    <span
+                                        className={`step-text ${isCompleted ? "completed" : isActive ? "active" : ""}`}
+                                    >
                                         {label}
                                     </span>
                                 </div>
@@ -259,6 +266,7 @@ function AddEmployee() {
                         })}
                     </div>
                 </div>
+
                 {/* Profile form */}
                 <form id="add-profile-form" encType="multipart/form-data">
                     <div className="form-body mt-4">
@@ -274,7 +282,6 @@ function AddEmployee() {
                                                 <img className="profile-pic" alt="Profile"
                                                     src="https://i.postimg.cc/L5gvKJM4/default-avatar-profile-icon-of-social-media-user-vector.jpg"
                                                     style={{ width: '20%', height: '20%' }} />
-
                                             )}
                                             <div className="upload-button">
                                                 <i className="fa fa-arrow-circle-up" aria-hidden="true"></i>
@@ -303,7 +310,6 @@ function AddEmployee() {
                                                     type="text"
                                                     placeholder='First Name'
                                                     onChange={(e) => handleInputChange(e)}
-
                                                 />
                                                 {errors.first_name && <span className='text-danger'>{errors.first_name}</span>}
                                             </div>
@@ -324,7 +330,8 @@ function AddEmployee() {
                                                 {errors.last_name && <span className='text-danger'>{errors.last_name}</span>}
                                             </div>
                                         </div>
-                                        <div className="col-md-6 mt-3">
+
+                                        <div className='col-md-6 mt-3'>
                                             <div className="form-group">
                                                 <label htmlFor="gender">Gender<span className="text-danger">*</span></label>
                                                 <select
@@ -334,7 +341,6 @@ function AddEmployee() {
                                                     value={formData.gender}
                                                     onChange={(e) => handleInputChange(e)}
                                                     style={{ height: "50px" }}
-
                                                 >
                                                     <option value="">-Select-</option>
                                                     <option value="male">Male</option>
@@ -350,9 +356,8 @@ function AddEmployee() {
                                                 <label htmlFor="role_id">Role<span className="text-danger">*</span></label>
                                                 <select id="role_id" name="role_id" className="form-control mt-2" value={formData.role_id}
                                                     onChange={(e) => handleInputChange(e)}
-                                                    style={{ height: "50px" }}  >
+                                                    style={{ height: "50px" }}>
                                                     <option value="">-Select-</option>
-
                                                     <option value="1">Employee</option>
                                                     <option value="2">Admin</option>
                                                     <option value="3">SuperAdmin</option>
@@ -368,12 +373,11 @@ function AddEmployee() {
                                                 <input id="dob" name="dob" value={formData.dob || ''}
                                                     onChange={(e) => handleInputChange(e)}
                                                     type="date" className="form-control mt-2"
-                                                    placeholder="DOB" style={{ height: "50px" }}
+                                                    style={{ height: "50px" }}
                                                 />
                                                 {errors.dob && <span className='text-danger'>{errors.dob}</span>}
                                             </div>
                                         </div>
-
                                         <div className="col-md-6 mt-3">
                                             <div className="form-group">
                                                 <label htmlFor="blood_group">Blood Group<span className="text-danger">*</span></label>
@@ -1303,50 +1307,47 @@ function AddEmployee() {
                                 )}
                             </div>
 
-                            <div className="text-center mt-4">
-                                <button type="submit" className="btn btn-success">Submit</button>
+                            {/* Centered Navigation Buttons */}
+                            <div className="d-flex justify-content-center mt-4 gap-3">
+                                <button type="button" onClick={() => setStep(step - 1)} className="btn btn-secondary px-4"
+                                    style={{
+                                        width: "150px", borderRadius: "5px", backgroundColor: "#fff", color: "#000",
+                                        fontWeight: "bold", border: "2px solid #ccc", boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                                    }} >
+                                    Prev
+                                </button>
+
+                                <button type="submit" className="btn btn-success px-4" style={{ width: "150px", }}>
+                                    Submit
+                                </button>
                             </div>
                         </div>
                     )}
-                    <div
-                        className="form-footer d-flex justify-content-between mt-4"
-                        style={{ gap: "10px" }}
-                    >
-                        {step > 1 && (
-                            <button
-                                type="button"
-                                onClick={() => setStep(step - 1)}
-                                style={{
-                                    padding: "10px 15px",
-                                    borderRadius: "5px",
-                                    border: "none",
-                                    backgroundColor: "#6c757d",
-                                    color: "#fff",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                Previous
-                            </button>
-                        )}
-                        {step < 7 && (
 
-                            <button
-                                type="button"
-                                onClick={() => setStep(step + 1)}
-                                style={{
-                                    padding: "10px 15px",
-                                    borderRadius: "5px",
-                                    border: "none",
-                                    backgroundColor: "#007bff",
-                                    color: "#fff",
-                                    cursor: "pointer",
-                                }}
-                            >
+                    {/* Centered Global Navigation Buttons (Steps 1-6) */}
+                    {step < 7 && (
+                        <div className="form-footer d-flex justify-content-center mt-4 gap-3">
+                            {step > 1 && (
+                                <button type="button" onClick={() => setStep(step - 1)} className="btn px-4"
+                                    style={{
+                                        width: "150px",
+                                        borderRadius: "5px",
+                                        backgroundColor: "#fff",
+                                        color: "#000",
+                                        fontWeight: "bold",
+                                        border: "2px solid #ccc",
+                                        boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+                                    }} >
+                                    Prev
+                                </button>
+                            )}
+
+                            <button type="button" onClick={() => setStep(step + 1)} className="btn btn-primary px-4" style={{ width: "150px", }} >
                                 Next
                             </button>
-                        )}
+                        </div>
+                    )}
 
-                    </div>
                 </form>
             </div>
         </div>
