@@ -2,10 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import axios from "axios";
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-// import LeaveTypesAdd from './LeaveTypesAdd';
+import DataTable from 'react-data-table-component';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Button, Modal } from 'react-bootstrap';
@@ -67,15 +64,6 @@ function LeaveTypes() {
     const handleEditBtn = async (leavetypes) => {
         //    console.log(technologies);
         try {
-            const response = await axios.get(`api/leave_type/${leavetypes.leave_type_id}`,
-                {
-                    headers: {
-                        'userId': userId,
-                        'leaveId': leavetypes.leave_type_id
-                    }
-                })
-            console.log("clicked by the ID:", leavetypes.leave_type_id);
-            console.log('Fetched leavetypes details:', response.data);
             setSelectedLeaveTypes(leavetypes)
             setFormMode("edit");
             toggleSidebar()
@@ -121,59 +109,32 @@ function LeaveTypes() {
         }
     };
 
-
+    const data = [
+        { id: 1, leave_type_code: "SICK", leave_type_name: "Sick Leave", status: "Active" },
+        { id: 2, leave_type_code: "ANNUAL", leave_type_name: "Annual Leave", status: "Inactive" },
+        { id: 3, leave_type_code: "MATERNITY", leave_type_name: "Maternity Leave", status: "Active" },
+    ];
 
 
     const columns = [
+        { name: "Leave Type Code", selector: (row) => row.leave_type_code, sortable: true },
+        { name: "Leave Type Name", selector: (row) => row.leave_type_name, sortable: true },
+        { name: "Status", selector: row => row.status, sortable: true },
         {
-            headerName: "#",
-            width: 100,
-            valueGetter: (params) => currentPage * pageSize + (params.node.rowIndex + 1),
+            name: "Actions",
+            cell: (row) => (
+                <div className="d-flex">
+                    <Button size="sm" onClick={() => handleEditBtn(row)} className="me-2" 
+                    style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "blue" }}>
+                        <FontAwesomeIcon icon={faEdit} />
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteBtn(row)}
+                        style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "red" }}>
+                        <FontAwesomeIcon icon={faTrash} />
+                    </Button>
+                </div>
+            ),
         },
-        { headerName: "Leave Type Code", field: "leave_type_code", sortable: true },
-        { headerName: "Leave Type Name", field: "leave_type_name", sortable: true },
-        { headerName: "Status", field: "status", sortable: true },
-        {
-            headerName: 'Action',
-            field: 'action',
-            //         cellRendererFramework: (params) => {
-            //             const { leave_type_id, status } = params.data;
-            //             return(
-            //             // <div dangerouslySetInnerHTML={{ __html: params.value }}></div>
-            //             <div className="d-flex">
-            //             <a className="cursor-pointer me-2" onClick={() => handleEditBtn(params.data)}>
-            //                 <FontAwesomeIcon icon={faEdit} />
-            //             </a>
-            //         </div>
-            //    ) },
-            cellRendererFramework: (params) => {
-                if (params.data.status === 'Active') {
-                    const { technology_id } = params.data;
-                    return (
-                        <div className="d-flex">
-                            <a className="cursor-pointer me-2" onClick={() => handleEditBtn(params.data)}>
-                                <FontAwesomeIcon icon={faEdit} />
-                            </a>
-                            <Button className="cursor-pointer ms-3 btn-danger"
-                                style={{ width: "80px", height: "30px", margin: "5px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center" }}
-                                onClick={() => handleDeleteBtn(params.data)}>
-                                Inactive
-                            </Button>
-                        </div>
-                    );
-                } else {
-                    return (
-                        <div className="d-flex">
-                            <a className="cursor-pointer me-2" onClick={() => handleEditBtn(params.data)}>
-                                <FontAwesomeIcon icon={faEdit} />
-                            </a>
-                        </div>
-                    );
-                }
-            },
-
-        },
-
     ];
 
     const handlePageSizeChange = (e) => {
@@ -210,6 +171,8 @@ function LeaveTypes() {
         }));
 
     }
+
+     
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Form data on submit:', formData); // Ensure status is included here
@@ -308,17 +271,20 @@ function LeaveTypes() {
     return (
         <div className="table-container" style={{ overflowX: 'hidden', overflowY: 'hidden', width: '100%', padding: '30px' }}>
             <div className="row">
-                <div className="d-flex justify-content-between align-items-center mb-3 w-100">
-                    <h5 className="text-uppercase fw-bold">EMPLOYEE LIST</h5>
-                    <button onClick={(e) => handleAddButtonClick(e)}
-                        type="button"
-                        className="btn btn-primary template-btn px-5"
-                        data-bs-toggle="offcanvas"
-                        role="button"
-                        aria-controls="offcanvasExample1"
-                    >
-                        Add
-                    </button>
+                <div className="col-lg-12">
+                    <div className="btm-for mb-4 text-lg-end">
+                        <div className="ms- d-flex justify-content-end">
+                            <div className="btn-group">
+                                <button
+                                    type="button"
+                                    className="btn template-btn px-5 btn-primary"
+                                    onClick={handleAddButtonClick}
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -327,29 +293,9 @@ function LeaveTypes() {
             </div>
 
             <hr />
+            {/* Search section */}
             <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div className="text-start ms-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <span>Show</span>
-                        <select
-                            className='form-control'
-                            style={{
-                                width: "150px",
-                                height: "100%",
-                                margin: "2px",
-                                borderRadius: "8px",
-                                border: 'none solid 2px'
-                            }}
-                            value={pageSize}
-                            onChange={handlePageSizeChange}
-                        >
-                            {[5, 10, 20, 30].map((option) => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
                     <div className="flex justify-center text-end mb-3 me-3" >
 
                         <input className='form-control' style={{ width: '100%' }}
@@ -359,48 +305,8 @@ function LeaveTypes() {
                     </div>
                 </div>
 
-                <div className="ag-theme-alpine" style={{ width: '100%', fontSize: '16px' }}>
-                    <AgGridReact
-                        rowData={leavetypes}
-                        columnDefs={columns}
-                        domLayout='autoHeight'
-                        onGridReady={(params) => {
-                            params.api.sizeColumnsToFit();
-                        }}
-                    />
-                </div>
-
-                <div className="text-end me-2 mt-3">
-                    <button
-                        className="btn btn-white"
-                        onClick={() => onPageChanged(currentPage - 1)}
-                        disabled={currentPage === 0}
-                    >
-                        Prev
-                    </button>
-
-                    {[...Array(Math.ceil(totalCount / pageSize))].map((_, index) => (
-                        <button
-                            key={index}
-                            className={`btn ${currentPage === index ? "btn-primary" : "btn-white"}`}
-                            onClick={() => onPageChanged(index)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-
-                    <button
-                        className="btn btn-white"
-                        onClick={() => onPageChanged(currentPage + 1)}
-                        disabled={(currentPage + 1) * pageSize >= totalCount}
-                    >
-                        Next
-                    </button>
-                </div>
-
-                <div className="text-start ms-2 mb-2">
-                    Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalCount)} of {totalCount} entries
-                </div>
+                {/* Data table */}
+                <DataTable columns={columns} data={data} pagination highlightOnHover responsive />
             </div>
 
             <Modal show={modalBox} onHide={() => setModalBox(false)}>
@@ -416,10 +322,10 @@ function LeaveTypes() {
 
             {/* Add and edit */}
             <div className="offcanvas offcanvas-end customeoff addtask" tabIndex="-1" id="offcanvasExample1">
-                <div className="offcanvas-header" style={{ backgroundColor: 'blue' }}>
-                    <h5 className="modal-title" id="#gridSystemModal1">{'edit' ? 'Edit LeaveTypes' : 'Add New LeaveTypes'}</h5>
+            <div className="offcanvas-header" style={{ backgroundColor: '#0047bb' }}>
+                    <h5 className="modal-title text-white">{formMode === 'edit' ? 'Edit Leave Types' : 'Add Leave Type'}</h5>
                     <button onClick={handleCancel} type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
-                        <i className="fa fa-close"></i>
+                    <i className="fa fa-close" style={{ color: 'white' }}></i>
                     </button>
                 </div>
                 <div className="offcanvas-body">

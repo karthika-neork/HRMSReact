@@ -65,7 +65,7 @@ const Header = ({ defaultSection = "Employees" }) => {
         case 'Dashboard':
           setCurrentPage('dashboard');
           break;
-        case 'User Attedance':
+        case 'User Attendance':
           setCurrentPage('attedance');
           break;
         case 'My Attendance':

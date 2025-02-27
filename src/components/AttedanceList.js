@@ -19,7 +19,7 @@ const AttendanceTable = () => {
     });
 
     const columns = [
-        { name: "SI No", selector: (row, index) => index + 1, sortable: false }, 
+        { name: "SI No", selector: (row, index) => index + 1, sortable: false },
         { name: "Name", selector: (row) => row.name, sortable: true },
         { name: "Date", selector: (row) => row.date, sortable: true },
         { name: "Punch In Time", selector: (row) => row.punchIn },
@@ -145,19 +145,22 @@ const AttendanceTable = () => {
                 <h6 className="mb-0 text-uppercase">Attendance List</h6>
             </div>
 
-            <div className="d-flex align-items-center justify-content-end mb-3 gap-4">
-                <input type="date" className="form-control me-2" style={{ maxWidth: '150px' }} />
-                <input type="date" className="form-control me-2" style={{ maxWidth: '150px' }} />
-                <button className="btn btn-primary me-2">Search</button>
-                <a className="text-primary me-2 cursor-pointer">Clear Filter</a>
-                <button
-                    className="btn btn-primary"
-                    data-bs-toggle=""
-                    data-bs-target="#attendanceOffcanvas"
-                    onClick={handleAddAttendance}
-                >
-                    Add Attendance
-                </button>
+            <div className="d-flex overflow-auto">
+                <div className="d-flex flex-nowrap align-items-center gap-2 gap-md-3 py-2 w-100 justify-content-md-end">
+                    <input type="date" className="form-control w-auto w-md-25" style={{ minWidth: '150px', maxWidth: '200px' }} />
+                    <input type="date" className="form-control w-auto w-md-25" style={{ minWidth: '150px', maxWidth: '200px' }} />
+                    <button className="btn btn-primary" style={{ minWidth: '120px' }}>Search</button>
+                    <a className="text-primary cursor-pointer" style={{ minWidth: '80px' }}>Clear Filter</a>
+                    <button
+                        className="btn btn-primary"
+                        style={{ minWidth: '150px' }}
+                        data-bs-toggle=""
+                        data-bs-target="#attendanceOffcanvas"
+                        onClick={handleAddAttendance}
+                    >
+                        Add Attendance
+                    </button>
+                </div>
             </div>
 
             <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.1)' }}>

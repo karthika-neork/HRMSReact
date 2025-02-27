@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import DataTable from "react-data-table-component";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import { Modal, Button } from 'react-bootstrap';
 import { toast, ToastContainer, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaTrash, FaCheckCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCheckCircle } from "react-icons/fa";
 import "../commonStyle/Home.css";
 
 function Technologies() {
@@ -17,7 +14,6 @@ function Technologies() {
     const [pageSize, setPageSize] = useState(10);
     const [globalFilter, setGlobalFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
-    const [technologies, setTechnologies] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [formMode, setFormMode] = useState("add");
     const [technologyToDelete, setTechnologyToDelete] = useState(null);
@@ -29,6 +25,11 @@ function Technologies() {
         technology_id: ""
     });
     const [errors, setErrors] = useState({});
+
+    const [technologies, setTechnologies] = useState([ 
+        { technology_id: 1, technology_name: "ReactJS", status: "Active" },
+        { technology_id: 2, technology_name: "NodeJS", status: "Inactive" }
+    ]);
 
     useEffect(() => {
         fetchTechnologies();
@@ -133,25 +134,30 @@ function Technologies() {
     };
 
     const handleEditBtn = async (technology) => {
+        console.log("Edit button clicked for:", technology);
+    
         try {
-            const response = await axios.get(`api/technology/${technology.technology_id}`, {
-                headers: {
-                    'userId': userId,
-                    'techId': technology.technology_id
-                }
-            });
+            setFormMode("edit");
+            console.log("Form mode set to:", "edit");
+    
             setFormData({
                 technology_id: technology.technology_id,
                 technology_name: technology.technology_name,
-                status: technology.status === 'Inactive' ? '0' : '1'
+                status: technology.status?.toLowerCase() === 'inactive' ? '0' : '1'
             });
-            setFormMode("edit");
+    
+            console.log("Updated formData:", {
+                technology_id: technology.technology_id,
+                technology_name: technology.technology_name,
+                status: technology.status?.toLowerCase() === 'inactive' ? '0' : '1'
+            });
+    
             toggleSidebar();
         } catch (error) {
-            console.error("Error editing technology:", error);
+            console.error("Error in handleEditBtn:", error);
         }
-    }
-
+    };
+    
     const handleDeleteBtn = (technology) => {
         setTechnologyToDelete(technology);
         setModalBox(true);
@@ -213,42 +219,28 @@ function Technologies() {
     }
 
     const columns = [
+        { name: "S.No", selector: (row, index) => index + 1, sortable: true,  },
+        { name: "Technology", selector: row => row.technology_name, sortable: true },
+        { name: "Status", selector: row => row.status, sortable: true },
         {
-          headerName: "#",
-          width: 100,
-          valueGetter: (params) =>
-            currentPage * pageSize + (params.node.rowIndex + 1),
-        },
-        { headerName: "Technology", field: "technology_name", width: 350 },
-        { headerName: "Status", field: "status", width: 400 },
-        {
-          headerName: "Actions",
-          field: "actions",
-          width: 300,
-          cellRendererFramework: (params) => (
-            <div>
-              <FontAwesomeIcon
-                icon={faEdit}
-                onClick={() => handleEditBtn(params.data)}
-              />
-              {params.data.status === "Active" && (
-                <Button
-                  className="ms-3 btn-danger"
-                  onClick={() => {
-                    setTechnologyToDelete(params.data);
-                    setModalBox(true);
-                  }}
-                >
-                  Inactive
-                </Button>
-              )}
-            </div>
-          ),
-        },
-      ];
+            name: "Actions",
+            cell: (row) => (
+                <>
+                    <Button variant="primary" size="sm" onClick={() => handleEditBtn(row)} className="me-2"
+                        style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "blue" }}>
+                        <FaEdit />
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => { setTechnologyToDelete(row); setModalBox(true); }}
+                        style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "red" }}>
+                        <FaTrash />
+                    </Button>
+                </>
+            )
+        }
+    ];    
     return (
         <div className="table-container" style={{ overflowX: 'hidden', overflowY: 'hidden', width: '100%', padding: '70px' }}>
-            <div className="page-breadcrumb d-flex align-items-center mb-3">
+            {/* <div className="page-breadcrumb d-flex align-items-center mb-3">
                 <div className="ps-0">
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb mb-0 p-0">
@@ -257,12 +249,12 @@ function Technologies() {
                         </ol>
                     </nav>
                 </div>
-            </div>
+            </div> */}
 
             <div className="row">
                 <div className="col-lg-12">
                     <div className="btm-for mb-4 text-lg-end">
-                        <div className="ms-auto">
+                        <div className="ms- d-flex justify-content-end">
                             <div className="btn-group">
                                 <button
                                     type="button"
@@ -284,28 +276,7 @@ function Technologies() {
             <hr />
             <div className="p-6 bg-white rounded-lg shadow" style={{ padding: '20px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div className="text-start ms-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <span>Show</span>
-                        <select
-                            className="form-control"
-                            style={{
-                                width: "150px",
-                                height: "100%",
-                                margin: "2px",
-                                borderRadius: "8px",
-                                border: 'none solid 2px'
-                            }}
-                            value={pageSize}
-                            onChange={(e) => setPageSize(Number(e.target.value))}
-                        >
-                            {pageSizeOptions.map((option) => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex justify-center text-end mb-3 me-3">
+                    <div className="flex justify-center text-end mb-3 me-3 ms-auto">
                         <input
                             className="form-control"
                             style={{ width: '100%' }}
@@ -316,51 +287,17 @@ function Technologies() {
                     </div>
                 </div>
 
-                <div className="ag-theme-alpine ag-grid-custom" style={{ width: '100%', fontSize: '16px' }}>
-                    <AgGridReact
-                        rowData={technologies}
-                        columnDefs={columns}
-                        domLayout="autoHeight"
-                    />
-                </div>
-
-                <div className="text-end me-2 mt-3">
-                    <button
-                        className="btn btn-white"
-                        onClick={() => setCurrentPage(prev => prev - 1)}
-                        disabled={currentPage === 0}
-                    >
-                        Prev
-                    </button>
-
-                    {[...Array(Math.ceil(totalCount / pageSize))].map((_, index) => (
-                        <button
-                            key={index}
-                            className={`btn ${currentPage === index ? "btn-primary" : "btn-white"}`}
-                            onClick={() => setCurrentPage(index)}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-
-                    <button
-                        className="btn btn-white"
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                        disabled={(currentPage + 1) * pageSize >= totalCount}
-                    >
-                        Next
-                    </button>
-                </div>
-
-                <div className="text-start ms-2 mb-2">
-                    Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalCount)} of {totalCount} entries
-                </div>
-            </div>
+                <DataTable
+                columns={columns}
+                data={technologies.filter(t => t.technology_name.toLowerCase().includes(globalFilter.toLowerCase()))}
+                pagination
+                highlightOnHover
+            />
 
             {/* Sidebar for Add/Edit */}
             <div className="offcanvas offcanvas-end customeoff addtask" tabIndex="-1" id="offcanvasExample1">
-                <div className="offcanvas-header" style={{ backgroundColor: 'blue' }}>
-                    <h5 className="modal-title">{formMode === 'edit' ? 'Edit Technology' : 'Add New Technology'}</h5>
+                <div className="offcanvas-header" style={{ backgroundColor: '#0047bb' }}>
+                    <h5 className="modal-title text-white">{formMode === 'edit' ? 'Edit Technology' : 'Add New Technology'}</h5>
                     <button onClick={handleCancel} type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
                     <i className="fa fa-close" style={{ color: 'white' }}></i>
                     </button>
@@ -426,6 +363,7 @@ function Technologies() {
 </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 };
