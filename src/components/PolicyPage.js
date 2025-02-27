@@ -1,16 +1,64 @@
 import React, { useState } from 'react';
 import { FaEdit, FaDownload } from 'react-icons/fa';
-
+import DataTable from 'react-data-table-component';
+const dummyData = [
+    { id: 1, title: 'Leave Policy', description: 'Details about leave policy', effectiveFrom: '2024-01-01', status: 'Active' },
+    { id: 2, title: 'Work From Home', description: 'WFH guidelines and rules', effectiveFrom: '2023-06-15', status: 'Inactive' },
+    { id: 3, title: 'Overtime Policy', description: 'Overtime pay and limits', effectiveFrom: '2022-12-01', status: 'Active' },
+    { id: 4, title: 'Dress Code', description: 'Official dress code rules', effectiveFrom: '2024-03-10', status: 'Active' }
+];
 function PolicyPage() {
-    const [policyData] = useState([
+    const columns = [
         {
-            id: 1,
-            title: "Holiday List 2025",
-            description: "Holiday List",
-            effectiveFrom: "2025-01-01",
-            status: "Active",
+            name: '#',
+            selector: row => row.id,
+            sortable: true,
         },
-    ]);
+        {
+            name: 'Title',
+            selector: row => row.title,
+            sortable: true,
+        },
+        {
+            name: 'Description',
+            selector: row => row.description,
+            sortable: false,
+        },
+        {
+            name: 'Effective From',
+            selector: row => row.effectiveFrom,
+            sortable: true,
+        },
+        {
+            name: 'Status',
+            selector: row => row.status,
+            sortable: true,
+        },
+        {
+            name: 'Action',
+            cell: row => (
+                <button
+                    style={{
+                        padding: '5px 10px',
+                        backgroundColor: '#007BFF',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                    }}
+                    onClick={() => handleEditClick(row)}
+                >
+                    <FaEdit /> Edit
+                </button>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        }
+    ];
 
     const [selectedPolicy, setSelectedPolicy] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -28,7 +76,7 @@ function PolicyPage() {
     const downloadCSV = () => {
         const csvData = [
             ["#", "Title", "Description", "Effective From", "Status"], // Header row
-            ...policyData.map((row) => [
+            ...dummyData.map((row) => [
                 row.id,
                 row.title,
                 row.description,
@@ -52,71 +100,24 @@ function PolicyPage() {
 
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <header style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Policy Details</h1>
-                <button
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#007BFF',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                    }}
-                    onClick={downloadCSV}
-                >
-                    <FaDownload /> Download CSV
-                </button>
-            </header>
-
-            <div>
-                <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>Policy Data Table</h2>
-                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#f9f9f9' }}>
-                    <thead style={{ backgroundColor: '#f1f1f1' }}>
-                        <tr>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'left' }}>#</th>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'left' }}>Title</th>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'left' }}>Description</th>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'left' }}>Effective From</th>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'left' }}>Status</th>
-                            <th style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {policyData.map((policy) => (
-                            <tr key={policy.id}>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{policy.id}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{policy.title}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{policy.description}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{policy.effectiveFrom}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{policy.status}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>
-                                    <button
-                                        style={{
-                                            padding: '5px 10px',
-                                            backgroundColor: '#007BFF',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '5px',
-                                        }}
-                                        onClick={() => handleEditClick(policy)}
-                                    >
-                                        <FaEdit /> Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className='row'>
+                <div className='col-6'> <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Policy Details</h1></div>
+                <div className='col-6 d-flex justify-content-end' >
+                    <button className="btn btn-primary" onClick={downloadCSV}>
+                        <FaDownload className="me-2" /> Download CSV
+                    </button>
+                </div>
             </div>
-
+            <div className='row'>
+                <DataTable
+                    title="Policy List"
+                    columns={columns}
+                    data={dummyData}
+                    pagination
+                    highlightOnHover
+                    responsive
+                />
+            </div>
             {/* Modal */}
             {showModal && selectedPolicy && (
                 <div
