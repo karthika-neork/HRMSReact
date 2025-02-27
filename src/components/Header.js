@@ -152,7 +152,7 @@ const Header = ({ defaultSection = "Employees" }) => {
 
   return (
     <div>
-    <div className="py-2 px-3 shadow-sm" style={{ backgroundColor: "#0047bb", color: "white" }}>
+      <div className="py-2 px-3 shadow-sm" style={{ backgroundColor: "#0047bb", color: "white" }}>
         <div className="container-fluid d-flex justify-content-between align-items-center">
 
           {/* Left Section */}
@@ -170,30 +170,71 @@ const Header = ({ defaultSection = "Employees" }) => {
           <div className="d-flex align-items-center">
 
             {/* Settings Dropdown */}
-            <Dropdown show={showSettings} onToggle={setShowSettings} ref={settingsRef} className="me-3">
-              <Dropdown.Toggle variant="link" className="text-white p-0 border-0">
+            <Dropdown
+              show={showSettings}
+              onToggle={(isOpen) => setShowSettings(isOpen)}
+              ref={settingsRef}
+              className="me-3"
+            >
+              <Dropdown.Toggle
+                variant="link"
+                className="text-white p-0 border-0 d-flex align-items-center"
+                aria-expanded={showSettings}
+              >
                 <FaCog size={20} />
               </Dropdown.Toggle>
-              <Dropdown.Menu className="dropdown-menu-end">
-                <Dropdown.Item onClick={() => handleDropdownClick("Masters")}>Masters</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleDropdownClick("Employees")}>Employees</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleDropdownClick("Notifications")}>Notifications</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleDropdownClick("Policy")}>Policy</Dropdown.Item>
-                <Dropdown.Item onClick={() => handleDropdownClick("Holiday")}>Holiday</Dropdown.Item>
+
+              <Dropdown.Menu className="dropdown-menu-end shadow-sm p-2">
+                <Dropdown.Item className="py-2 px-3" onClick={() => handleDropdownClick("Masters")}>
+                  Masters
+                </Dropdown.Item>
+                <Dropdown.Item className="py-2 px-3" onClick={() => handleDropdownClick("Employees")}>
+                  Employees
+                </Dropdown.Item>
+                <Dropdown.Item className="py-2 px-3" onClick={() => handleDropdownClick("Notifications")}>
+                  Notifications
+                </Dropdown.Item>
+                <Dropdown.Item className="py-2 px-3" onClick={() => handleDropdownClick("Policy")}>
+                  Policy
+                </Dropdown.Item>
+                <Dropdown.Item className="py-2 px-3" onClick={() => handleDropdownClick("Holiday")}>
+                  Holiday
+                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
 
+
             {/* Notifications Dropdown */}
-            <Dropdown show={showNotifications} onToggle={setShowNotifications} ref={notificationRef} className="me-3 position-relative">
-              <Dropdown.Toggle variant="link" className="text-white p-0 border-0 position-relative">
+            <Dropdown
+              show={showNotifications}
+              onToggle={(isOpen) => setShowNotifications(isOpen)}
+              ref={notificationRef}
+              className="me-3 position-relative"
+            >
+              <Dropdown.Toggle
+                variant="link"
+                className="text-white p-0 border-0 position-relative d-flex align-items-center"
+                aria-expanded={showNotifications}
+              >
                 <FaBell size={20} />
-                <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">0</span>
+                {/* {notificationsCount > 0 && (
+                  <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                    {notificationsCount}
+                  </span>
+                )} */}
               </Dropdown.Toggle>
-              <Dropdown.Menu className="dropdown-menu-end">
-                <Dropdown.Header>Notifications</Dropdown.Header>
-                <p className="text-center m-2">No new notifications</p>
+
+              <Dropdown.Menu className="dropdown-menu-end shadow-sm p-2">
+                <Dropdown.Header className="fw-bold">Notifications</Dropdown.Header>
+                {/* {notificationsCount > 0 ? (
+                  <Dropdown.Item className="py-2 px-3">You have {notificationsCount} new notifications.</Dropdown.Item>
+                ) : (
+                  <p className="text-center text-muted m-2">No new notifications</p>
+                )} */}
                 <Dropdown.Item className="text-center">
-                  <button className="btn btn-primary w-100">View All</button>
+                  <button onClick={() => handleDropdownClick("Notifications")} className="btn btn-primary w-100">
+                    View All
+                  </button>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
