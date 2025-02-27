@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
+import DataTable from 'react-data-table-component';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaEdit, FaTrash, FaCheckCircle ,FaEye} from "react-icons/fa";
+import { Button } from 'react-bootstrap';
 
 function HolidayPage() {
     const [pageSizeOptions] = useState([5, 10, 20, 30]);
@@ -25,6 +28,45 @@ function HolidayPage() {
         { id: 3, date: '2024-09-17', name: 'Fourth Onam', type: 'Holiday', description: 'Fourth Onam', status: 'Active' },
         { id: 4, date: '2024-10-01', name: 'Dussehra', type: 'Holiday', description: 'Holiday', status: 'Inactive' },
     ]);
+
+    // Define columns for DataTable
+    const columns = [
+        { name: "#", selector: (row, index) => index + 1, sortable: false, width: "60px" },
+        { name: "Date", selector: row => row.date, sortable: true },
+        { name: "Name", selector: row => row.name, sortable: true },
+        { name: "Holiday Type", selector: row => row.type, sortable: true },
+        { name: "Description", selector: row => row.description, sortable: false },
+        {
+            name: "Status",
+            selector: row => row.status,width: "130px" ,
+            cell: row => (
+                <span className={`badge ${row.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
+                    {row.status}
+                </span>
+            ),
+            sortable: true,
+        },
+        {
+            name: "Action", width: "130px" ,
+            cell: row => (
+                <>
+                <Button variant="primary" size="sm" onClick={() => handleEdit(row)} className="me-2"
+                    style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "blue" }}>
+                    <FaEdit />
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleDelete(row.id)}
+                    style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "red" }}>
+                    <FaTrash />
+                </Button>
+                <a className="cursor-pointer text-primary ms-2 custom-icon"><FaEye /></a>
+                
+                </>
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        }
+    ];
 
     const handleAdd = () => {
         setFormMode('add');
@@ -76,171 +118,93 @@ function HolidayPage() {
 
             <hr />
             <div className='p-6 bg-white rounded-lg shadow' style={{ padding: '20px' }}>
-                <div className='row'>
-                    <div className='col-md-4 mt-3'>
+                <div className='row d-flex align-items-end gap-2'>
+                    {/* From Date */}
+                    <div className='col-auto mt-3'>
                         <div className="form-group">
                             <label htmlFor="start_date">From<span className='text-danger'>*</span></label>
                             <input
-                                style={{ width: "50%", height: '40px' }} type="date"
-                                name='' className="form-control mt-2" placeholder=""
+                                style={{ width: "150px", height: '40px' }} type="date"
+                                name='from' className="form-control mt-2"
                             />
-
                         </div>
                     </div>
 
-                    <div class="col-md-4 mt-3">
+                    {/* To Date */}
+                    <div className="col-auto mt-3">
                         <div className="form-group">
-
-                            <label class="form-label">To<span className='text-danger'>*</span></label>
+                            <label className="form-label">To<span className='text-danger'>*</span></label>
                             <input
-                                style={{ width: "50%", height: '40px' }} type="date"
-                                name='to' className="form-control mt-" placeholder="to"
+                                style={{ width: "150px", height: '40px' }} type="date"
+                                name='to' className="form-control mt-2"
                             />
                         </div>
                     </div>
-                </div>
 
-
-                <div className="d-flex justify-content-between align-items-center mb- mt-3">
-                    <div className="text-start ms-2" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        <span>Show</span>
-                        <select
-                            className='form-control'
-                            style={{
-                                width: "150px",
-                                height: "100%",
-                                margin: "2px",
-                                borderRadius: "8px",
-                                border: 'none solid 2px'
-                            }}
-                            value={pageSize}
-                            onChange={handlePageSizeChange}
-                        >
-                            {[5, 10, 20, 30].map((option) => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex justify-center text-end mb- me-3" >
-
-                        <input className='form-control' style={{ width: '100%' }}
-                            value={globalFilter}
-                            onChange={(e) => setGlobalFilter(e.target.value)}
-                            placeholder="Search..." />
-                    </div>
-                </div>
-
-                <div className="container-fluid p-">
-
-
-                    <div className="">
-                        <div className="card-body">
-                            <table className="table table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Date</th>
-                                        <th>Name</th>
-                                        <th>Holiday Type</th>
-                                        <th>Description</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {holidays.map((holiday, index) => (
-                                        <tr key={holiday.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{holiday.date}</td>
-                                            <td>{holiday.name}</td>
-                                            <td>{holiday.type}</td>
-                                            <td>{holiday.description}</td>
-                                            <td>
-                                                <span className={`badge ${holiday.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>{holiday.status}</span>
-                                            </td>
-                                            <td>
-                                                <button className="btn btn-sm btn-primary me-2" onClick={handleEdit}>✏️</button>
-                                                <button className="btn btn-sm btn-danger">❌</button>
-                                                <button className="btn btn-sm btn-info ms-2">👁️</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasForm" style={{ width: '400px', visibility: 'hidden' }}>
-                <div className="offcanvas-header">
-                    <h5 className="offcanvas-title">{formMode === 'add' ? 'Add Holiday' : 'Edit Holiday'}</h5>
-                    <button type="button" className="btn-close" onClick={closeOffcanvas}></button>
-                </div>
-                <div className="offcanvas-body">
-                    <form >
-                        <div className="mb-3">
-                            <label className="form-label">Date:</label>
-                            <input type="date" className="form-control" value={selectedHoliday?.date || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, date: e.target.value })} required />
-                        </div>
-                        
-                        <div className="mb-3">
-                            <label className="form-label">Name:</label>
-                            <input type="text" className="form-control" value={selectedHoliday?.name || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, name: e.target.value })} required />
-                        </div>
-                        
-                        <div className="mb-3">
-                            <label className="form-label">Type:</label>
-                            <input type="text" className="form-control" value={selectedHoliday?.type || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, type: e.target.value })} required />
-                        </div>
-                        
-                        <div className="mb-3">
-                            <label className="form-label">Description:</label>
-                            <textarea className="form-control" value={selectedHoliday?.description || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, description: e.target.value })} required></textarea>
-                        </div>
-                        
-                        <div className="mb-3">
-                            <label className="form-label">Status:</label>
-                            <select className="form-control" value={selectedHoliday?.status || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, status: e.target.value })}>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" className="btn btn-success">Save</button>
-                        <button type="button" className="btn btn-secondary ms-2" onClick={closeOffcanvas}>Cancel</button>
-                    </form>
-                </div>
-                </div>
-                    <div className="text-end me-2 mt-3">
-                        <button
-                            className="btn btn-white"
-                            onClick={() => onPageChanged(currentPage - 1)}
-                            disabled={currentPage === 0}
-                        >
-                            Prev
+                    {/* Search Button */}
+                    <div className="col-auto mt-4">
+                        <button className="btn btn-primary" style={{ height: '40px', padding: '5px 15px' }}>
+                            Search
                         </button>
+                    </div>
+                </div>
 
-                        {[...Array(Math.ceil(totalCount / pageSize))].map((_, index) => (
-                            <button
-                                key={index}
-                                className={`btn ${currentPage === index ? "btn-primary" : "btn-white"}`}
-                                onClick={() => onPageChanged(index)}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
+                <div className='p-6 bg-white rounded-lg ' style={{ padding: '', }}>
+                    <div className="justify-content-between align-items-center mb- mt-3 ">
+                        <div className=" text-end mb-2 me-3 ms-auto" >
 
-                        <button
-                            className="btn btn-white"
-                            onClick={() => onPageChanged(currentPage + 1)}
-                            disabled={(currentPage + 1) * pageSize >= totalCount}
-                        >
-                            Next
+                            <input className='form-control' style={{ width: '100%' }}
+                                value={globalFilter}
+                                onChange={(e) => setGlobalFilter(e.target.value)}
+                                placeholder="Search..." />
+                        </div>
+                    </div>
+
+                    <DataTable columns={columns} data={holidays} pagination highlightOnHover responsive />
+                </div>
+
+
+                <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasForm" style={{ width: '400px', visibility: 'hidden' }}>
+                    <div className="offcanvas-header" style={{ backgroundColor: '#0047bb' }}>
+                        <h5 className="modal-title text-white">{formMode === 'edit' ? 'Edit Holiday' : 'Add Holiday'}</h5>
+                        <button onClick={closeOffcanvas} type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+                            <i className="fa fa-close" style={{ color: 'white' }}></i>
                         </button>
                     </div>
 
-                    <div className="text-start ms-2 mb-2">
-                        Showing {currentPage * pageSize + 1} to {Math.min((currentPage + 1) * pageSize, totalCount)} of {totalCount} entries
+                    <div className="offcanvas-body">
+                        <form >
+                            <div className="mb-3">
+                                <label className="form-label">Date:</label>
+                                <input type="date" className="form-control" value={selectedHoliday?.date || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, date: e.target.value })} required />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Name:</label>
+                                <input type="text" className="form-control" value={selectedHoliday?.name || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, name: e.target.value })} required />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Type:</label>
+                                <input type="text" className="form-control" value={selectedHoliday?.type || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, type: e.target.value })} required />
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Description:</label>
+                                <textarea className="form-control" value={selectedHoliday?.description || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, description: e.target.value })} required></textarea>
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label">Status:</label>
+                                <select className="form-control" value={selectedHoliday?.status || ''} onChange={(e) => setSelectedHoliday({ ...selectedHoliday, status: e.target.value })}>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" className="btn btn-success">Save</button>
+                            <button type="button" className="btn btn-secondary ms-2" onClick={closeOffcanvas}>Cancel</button>
+                        </form>
                     </div>
                 </div>
 
