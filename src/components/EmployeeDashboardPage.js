@@ -17,19 +17,75 @@ function EmployeeDashboard() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [userAttendance, setUserAttendance] = useState(null);
 
+  // const handlePunch = async () => {
+  //   const token = sessionStorage.getItem('token');
+  //   const userId = sessionStorage.getItem('user_id');
+
+  //   if (!token || !userId) {
+  //     alert('User not authenticated');
+  //     return;
+  //   }
+
+  //   const url = isPunchedIn
+  //     ? '/punch-out'
+  //     : '/punch-in';
+
+  //   try {
+  //     const response = await axios({
+  //       method: 'POST',
+  //       url: url,
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`,
+  //         'Content-Type': 'application/json',
+  //         'userId': userId
+  //       }
+  //     });
+  //     if (isPunchedIn) {
+  //       setPunchOutTime(new Date());
+  //     } else {
+  //       setPunchInTime(new Date());
+  //       setPunchOutTime(null);
+  //     }
+  //     setIsPunchedIn(!isPunchedIn);
+  //     setOnBreak(false);
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //     // Axios provides error.response for server errors
+  //     const errorMessage = error.response?.data?.message || 'Failed to punch in/out';
+  //     alert(errorMessage);
+  //   }
+  // };
+
+  useEffect(() => {
+    // Check if user is punched in from sessionStorage
+    const storedPunchStatus = sessionStorage.getItem('punchStatus');
+    if (storedPunchStatus === 'punchedIn') {
+      setIsPunchedIn(true);
+      
+      // Also restore punch in time if available
+      const storedPunchInTime = sessionStorage.getItem('punchInTime');
+      if (storedPunchInTime) {
+        setPunchInTime(new Date(storedPunchInTime));
+      }
+    } else {
+      setIsPunchedIn(false);
+    }
+  }, []);
+  
+  // Update your handlePunch function
   const handlePunch = async () => {
     const token = sessionStorage.getItem('token');
     const userId = sessionStorage.getItem('user_id');
-
+  
     if (!token || !userId) {
       alert('User not authenticated');
       return;
     }
-
+  
     const url = isPunchedIn
       ? '/punch-out'
       : '/punch-in';
-
+  
     try {
       const response = await axios({
         method: 'POST',
@@ -40,12 +96,21 @@ function EmployeeDashboard() {
           'userId': userId
         }
       });
+      
       if (isPunchedIn) {
         setPunchOutTime(new Date());
+        // When punching out, clear the punch status
+        sessionStorage.removeItem('punchStatus');
+        sessionStorage.removeItem('punchInTime');
       } else {
-        setPunchInTime(new Date());
+        const now = new Date();
+        setPunchInTime(now);
         setPunchOutTime(null);
+        // When punching in, save the status and time
+        sessionStorage.setItem('punchStatus', 'punchedIn');
+        sessionStorage.setItem('punchInTime', now.toISOString());
       }
+      
       setIsPunchedIn(!isPunchedIn);
       setOnBreak(false);
     } catch (error) {
@@ -55,7 +120,7 @@ function EmployeeDashboard() {
       alert(errorMessage);
     }
   };
-
+  
 
   const handleBreak = async () => {
     if (loading) return; // Prevent multiple requests

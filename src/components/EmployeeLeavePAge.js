@@ -464,45 +464,49 @@ function EmployeeLeave() {
   };
 
   return (
-    <div>
+    <div className="" style={{ overflowX: 'hidden', overflowY: 'hidden', width: '100%', padding: '30px' }}>
       {/* Top Tabs */}
-      <div className="row justify-content-left w-100">
-        <div className="col-12 col-md-10 col-lg-8 bg-white rounded-lg shadow p-3 w-100">
-          <div className="d-flex flex-wrap justify-content-left ms-5 gap-3">
-            <button
-              className={`btn ${activeTab === "leave_entitlement" ? "btn-primary" : "btn-outline-primary"} me-2`}
-              onClick={() => setActiveTab("leave_entitlement")}
-            >
-              Leave Entitlement
-            </button>
-            <button
-              className={`btn ${activeTab === "approve" ? "btn-primary" : "btn-outline-primary"} me-2`}
-              onClick={() => setActiveTab("approve")}
-            >
-              Approve/Reject
-            </button>
-            <button
-              className={`btn ${activeTab === "assign" ? "btn-primary" : "btn-outline-primary"} me-2`}
-              onClick={() => setActiveTab("assign")}
-            >
-              Assign
-            </button>
-            <button
-              className={`btn ${activeTab === "apply" ? "btn-primary" : "btn-outline-primary"} me-2`}
-              onClick={() => setActiveTab("apply")}
-            >
-              Apply Leave
-            </button>
-            <button
-              className={`btn ${activeTab === "status" ? "btn-primary" : "btn-outline-primary"} me-2`}
-              onClick={() => setActiveTab("status")}
-            >
-              View Leave Status
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* <div className="row justify-content-center mt-4">
+  <div className="col-auto bg-white rounded-lg shadow p-3">
+    <div className="d-flex flex-nowrap overflow-auto px-2"></div> */}
 
+      <div className="row justify-content-left  mt-4">
+  <div className="col-12 col-md-10 col-lg-8 bg-white rounded-lg shadow p- w-100">
+    {/* Scrollable container with Bootstrap classes only */}
+    <div className="d-flex flex-nowrap overflow-auto pb-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+      <button
+        className={`btn ${activeTab === "leave_entitlement" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+        onClick={() => setActiveTab("leave_entitlement")}
+      >
+        Leave Entitlement
+      </button>
+      <button
+        className={`btn ${activeTab === "approve" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+        onClick={() => setActiveTab("approve")}
+      >
+        Approve/Reject
+      </button>
+      <button
+        className={`btn ${activeTab === "assign" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+        onClick={() => setActiveTab("assign")}
+      >
+        Assign
+      </button>
+      <button
+        className={`btn ${activeTab === "apply" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+        onClick={() => setActiveTab("apply")}
+      >
+        Apply Leave
+      </button>
+      <button
+        className={`btn ${activeTab === "status" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+        onClick={() => setActiveTab("status")}
+      >
+        View Leave Status
+      </button>
+    </div>
+  </div>
+</div>
       {/* Content Based on Active Tab */}
       {activeTab === "apply" && (
         <div className="mt-5">

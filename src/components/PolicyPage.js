@@ -100,17 +100,23 @@ function PolicyPage() {
 
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <div className='row'>
+            {/* <div className='row'>
                 <div className='col-6'> <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Policy Details</h1></div>
-                <div className='col-6 d-flex justify-content-end' >
+                
+            </div> */}
+            <div className='col-6 d-flex justify-content-end ms-auto' >
                     <button className="btn btn-primary" onClick={downloadCSV}>
                         <FaDownload className="me-2" /> Download CSV
                     </button>
                 </div>
+                <div className='row'>
+                <div className='col-6'> <h1 style={{ fontSize: '24px', fontWeight: 'bold' }}>Policy Details</h1></div>
+                
             </div>
+<hr />
             <div className='row'>
                 <DataTable
-                    title="Policy List"
+                    // title="Policy List"
                     columns={columns}
                     data={dummyData}
                     pagination
