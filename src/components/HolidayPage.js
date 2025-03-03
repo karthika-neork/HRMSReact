@@ -150,15 +150,25 @@ function HolidayPage() {
                 </div>
 
                 <div className='p-6 bg-white rounded-lg ' style={{ padding: '', }}>
-                    <div className="justify-content-between align-items-center mb- mt-3 ">
-                        <div className=" text-end mb-2 me-3 ms-auto" >
-
-                            <input className='form-control' style={{ width: '100%' }}
-                                value={globalFilter}
-                                onChange={(e) => setGlobalFilter(e.target.value)}
-                                placeholder="Search..." />
-                        </div>
+                <div className="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                    <div className="d-flex flex-wrap align-items-center gap-2 ms-auto">
+                        <span>Search:</span>
+                        <input
+                            className="form-control"
+                            style={{
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                                border: "1px solid #ced4da",
+                                width: "200px", /* Fixed width for all screen sizes */
+                                maxWidth: "100%" /* Prevent overflow on small screens */
+                            }}
+                            value={globalFilter}
+                            onChange={(e) => setGlobalFilter(e.target.value)}
+                            placeholder="Search..."
+                        />
                     </div>
+                </div>
+
 
                     <DataTable columns={columns} data={holidays} pagination highlightOnHover responsive />
                 </div>

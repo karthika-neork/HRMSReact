@@ -127,14 +127,22 @@ function MyAttendance() {
     };
 
     return (
-        <div className="container-fluid mt-5 w-100">
-            <div className="d-flex justify-content-between align-items-center mb-3 w-100">
-                <h5 className="text-uppercase fw-bold">My Attendance List</h5>
-                <button className="btn btn-primary" onClick={handleAddAttendance}>
-                    <i className="fa fa-plus me-2"></i> Add Attendance
-                </button>
+        <div className="container-fluid mt-5 w-100 p-4" >
+            <div className="row">
+                <div className="col-12">
+                    <div className="btm-for mb-4 d-flex justify-content-end">
+                        <div className="btn-group">
+                            <button className="btn btn-primary" onClick={handleAddAttendance}>
+                                <i className="fa fa-plus me-2"></i> Add Attendance
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-
+            <div className="title-head d-flex justify-content-between">
+                <h6 className="mb-0 text-uppercase">My Attendance List</h6>
+            </div>
+            <hr />
             <div className="card shadow-sm border-0 p-3 w-100">
                 <DataTable columns={columns} data={data} pagination responsive className="w-100" />
             </div>
