@@ -138,35 +138,34 @@ function EmployeeLeaveList() {
             </div>
 
             {/* Search & Filters */}
-            <Row className="mb-3 g-3">
-                <Col md={4}>
-                    <InputGroup>
-                        <FormControl
-                            placeholder="Search..."
-                            value={globalFilter}
-                            onChange={(e) => setGlobalFilter(e.target.value)}
-                        />
-                    </InputGroup>
-                </Col>
-                <Col md={3}>
-                    <Form.Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-                        <option value="">All Months</option>
-                        {months.map((month, index) => (
-                            <option key={index} value={month}>{month}</option>
-                        ))}
-                    </Form.Select>
-                </Col>
-                <Col md={3}>
-                    <Form.Select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
-                        <option value="">All Years</option>
-                        {years.map((year) => <option key={year} value={year}>{year}</option>)}
-                    </Form.Select>
-                </Col>
-                <Col md={2}>
-                    <Button variant="secondary" onClick={clearFilters} className="w-100">Clear</Button>
-                </Col>
-            </Row>
-
+            <Row className="mb-3 g-2 d-flex flex-nowrap overflow-auto overflow-md-visible justify-content-md-end">
+    <Col xs={6} sm={4} md={2} className="min-width">
+        <InputGroup>
+            <FormControl
+                placeholder="Search..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+            />
+        </InputGroup>
+    </Col>
+    <Col xs={6} sm={4} md={2} className="min-width">
+        <Form.Select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+            <option value="">All Months</option>
+            {months.map((month, index) => (
+                <option key={index} value={month}>{month}</option>
+            ))}
+        </Form.Select>
+    </Col>
+    <Col xs={6} sm={4} md={2} className="min-width">
+        <Form.Select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+            <option value="">All Years</option>
+            {years.map((year) => <option key={year} value={year}>{year}</option>)}
+        </Form.Select>
+    </Col>
+    <Col xs={6} sm={4} md={2} className="min-width">
+        <Button variant="secondary" onClick={clearFilters} className="w-100">Clear</Button>
+    </Col>
+</Row>
             {/* Data Table */}
             <div className="bg-white p-3 rounded shadow">
                 <DataTable

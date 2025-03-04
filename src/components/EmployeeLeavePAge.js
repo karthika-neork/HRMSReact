@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DataTable from 'react-data-table-component';
 import { FaEye, FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import { FaCheckCircle } from 'react-icons/fa';
 import { Modal, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import axios from '../axiosConfig';
+import { toast } from "react-toastify";
 
 // Inside your component
-
 function EmployeeLeave() {
   const [activeTab, setActiveTab] = useState("apply");
   const [pageIndex, setPageIndex] = useState(0);
@@ -32,8 +33,10 @@ function EmployeeLeave() {
     leaveType: '',
     leavesRemaining: '',
     fromDate: '',
-    toDate: '',
-    partialDays: 'none',
+    toDate: "",
+    partial_days: "partial_none", // Default: Full Day (None)
+    startSession: "", // Start Day Session (AM/PM)
+    endSession: "",
     totalDuration: '',
     comments: '',
     attachments: null
@@ -46,30 +49,150 @@ function EmployeeLeave() {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle input changes
-  const handleChange = (e) => {
-    const { id, value, type, files, name } = e.target;
-    const fieldId = id || name;
+  const [allowedPartialDays, setAllowedPartialDays] = useState(["none", "Half day", "Start Day Only", "End Day Only", "Start and End Day"]);
 
-    setFormData((prev) => ({
-      ...prev,
-      [fieldId]: type === 'file' ? files[0] : value,
-    }));
 
-    setTouched((prev) => ({
-      ...prev,
-      [fieldId]: true,
-    }));
+  const partialDaysOptions = [
+    { value: "partial_none", label: "None" },
+    { value: "partial_all", label: "Half Day" },
+    { value: "partial_start", label: "Start Day Only" },
+    { value: "partial_end", label: "End Day Only" },
+    { value: "partial_start_end", label: "Start and End Day" },
+  ];
 
-    if (errors[fieldId]) {
-      setErrors((prev) => ({
-        ...prev,
-        [fieldId]: '',
-      }));
+  const getPartialDaysOptions = () => {
+    if (!formData.fromDate || !formData.toDate) {
+      return ["partial_none", "partial_all", "partial_start", "partial_end", "partial_start_end"];
+    }
+
+    if (formData.fromDate === formData.toDate) {
+      return ["partial_none", "partial_all"]; // Only show None & Half Day
+    } else {
+      return ["partial_none", "partial_start", "partial_end", "partial_start_end"]; // Exclude Half Day
     }
   };
 
+  // Calculate duration based on selection
+  const calculateTotalDuration = (fromDate, toDate, partialDays) => {
+    if (!fromDate || !toDate) return "";
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    let totalDays = (to - from) / (1000 * 60 * 60 * 24) + 1; // Inclusive
+
+    switch (partialDays) {
+      case "partial_all": return "0.5"; // Half Day (only for same-day leave)
+      case "partial_start":
+      case "partial_end": return (totalDays - 0.5).toFixed(1); // Deduct 0.5 for either start or end
+      case "partial_start_end": return (totalDays - 1).toFixed(1); // Deduct 1 full day
+      default: return totalDays.toString(); // Full day
+    }
+  };
+
+  // Update allowed Partial Days & Duration
+  const updatePartialDaysAndDuration = (updatedForm) => {
+    const { fromDate, toDate, partial_days } = updatedForm;
+    if (!fromDate || !toDate) return;
+
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    const diffDays = (to - from) / (1000 * 60 * 60 * 24) + 1;
+
+    let updatedAllowedPartialDays = ["partial_none"];
+
+    if (diffDays === 1) {
+      updatedAllowedPartialDays = ["partial_none", "partial_all"];
+    } else {
+      updatedAllowedPartialDays = ["partial_none", "partial_start", "partial_end", "partial_start_end"];
+    }
+
+    let newDuration = calculateTotalDuration(fromDate, toDate, partial_days);
+
+    setFormData((prev) => ({
+      ...prev,
+      totalDuration: newDuration,
+      partial_days: updatedAllowedPartialDays.includes(partial_days) ? partial_days : "partial_none",
+    }));
+
+    setAllowedPartialDays(updatedAllowedPartialDays);
+  };
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { id, name, value, type, files } = e.target;
+    const fieldId = id || name;
+
+    setFormData((prev) => {
+      const updatedForm = { ...prev, [fieldId]: type === "file" ? files[0] : value };
+
+      if (fieldId === "fromDate" || fieldId === "toDate" || fieldId === "partial_days") {
+        updatePartialDaysAndDuration(updatedForm);
+      }
+
+      return updatedForm;
+    });
+  };
+  // Update Partial Days Options and Calculate Total Duration
+  // const updatePartialDaysAndDuration = (updatedForm) => {
+  //   const { fromDate, toDate, partialDays } = updatedForm;
+
+  //   if (!fromDate || !toDate) return;
+
+  //   const from = new Date(fromDate);
+  //   const to = new Date(toDate);
+  //   const diffDays = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1; // Inclusive of both dates
+
+  //   let allowedPartialDays = ["none"];
+  //   if (diffDays === 1) {
+  //     // Same Day Leave → Only show None & Half Day
+  //     allowedPartialDays = ["none", "Half Day"];
+  //   } else if (diffDays > 1) {
+  //     // Multi-day Leave → Show Start Day, End Day, Both
+  //     allowedPartialDays = ["none", "Start Day Only", "End Day Only", "Start and End Day"];
+  //   }
+
+  //   let duration = diffDays;
+  //   if (partialDays === "Half Day" && diffDays === 1) {
+  //     duration = 0.5;
+  //   } else if (partialDays === "Start Day Only" || partialDays === "End Day Only") {
+  //     duration = diffDays - 0.5;
+  //   } else if (partialDays === "Start and End Day") {
+  //     duration = diffDays - 1;
+  //   }
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     totalDuration: duration,
+  //     partialDays: allowedPartialDays.includes(partialDays) ? partialDays : "none", // Reset partialDays if it's invalid
+  //   }));
+
+  //   setAllowedPartialDays(allowedPartialDays);
+  // };
+
+  // Handle input changes
+  // const handleChange = (e) => {
+  //   const { id, value, type, files, name } = e.target;
+  //   const fieldId = id || name;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [fieldId]: type === "file" ? files[0] : value,
+  //   }));
+
+  //   setTouched((prev) => ({
+  //     ...prev,
+  //     [fieldId]: true,
+  //   }));
+
+  //   if (errors[fieldId]) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       [fieldId]: "",
+  //     }));
+  //   }
+  // };
   // Handle field blur for validation
+
+
   const handleBlur = (e) => {
     const { id, name } = e.target;
     const fieldId = id || name;
@@ -135,7 +258,7 @@ function EmployeeLeave() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -146,11 +269,96 @@ function EmployeeLeave() {
       return;
     }
 
-    console.log('Form submitted:', formData);
-    handleReset();
-    setIsSubmitting(false);
-  };
+    const token = sessionStorage.getItem("token");
+    const userId = sessionStorage.getItem("user_id");
+    console.log("Token:", token);
+    console.log("User ID:", userId);
 
+    if (!token || !userId) {
+      alert("Authentication error: Please log in again.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Convert date format to `DD-MM-YYYY`
+    const formatDate = (dateString) => {
+      if (!dateString) return null;
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-GB').split('/').join('-'); // Converts to `DD-MM-YYYY`
+    };
+
+    // Convert leaveType to an integer
+    const leaveTypeId = Number(formData.leaveType);
+    if (!leaveTypeId) {
+      alert("Please select a valid leave type.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Ensure partialDays matches API expected values
+    const partialDaysMap = {
+      none: "partial_none",
+      start: "partial_start",
+      end: "partial_end",
+      both: "partial_start_end",
+      all: "partial_all", // Ensure "all" is handled if needed
+    };
+
+    const partialDaysValue = partialDaysMap[formData.partialDays] || null;
+    console.log("Partial Days Sent:", partialDaysValue);
+
+    // Ensure at least 0.5 leave days
+    const totalLeaves = parseFloat(formData.totalDuration) || 0;
+    if (totalLeaves < 0.5) {
+      alert("Total leave duration must be at least 0.5 days.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Prepare API request data
+    const requestData = {
+      user_id: parseInt(userId, 10),
+      leave_type_id: leaveTypeId,
+      from_date: formatDate(formData.fromDate),
+      to_date: formatDate(formData.toDate),
+      no_of_leaves: totalLeaves,
+      reason_for_leave: formData.comments,
+      partial_days: partialDaysValue,
+    };
+
+    // Add `partial_start_day` and `partial_end_day` conditionally
+    if (partialDaysValue === "partial_start" || partialDaysValue === "partial_start_end") {
+      requestData.partial_start_day = "FN"; // or "AN" based on user input
+    }
+
+    if (partialDaysValue === "partial_end" || partialDaysValue === "partial_start_end") {
+      requestData.partial_end_day = "AN"; // or "FN" based on user input
+    }
+
+    try {
+      const response = await axios.post(
+        "/apply-leave",
+        requestData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'userId': userId
+          },
+        }
+      );
+      console.log("Request Data:", requestData);
+      console.log("Partial Days Sent:", partialDaysValue);
+      console.log("Leave application submitted", response.data);
+
+      toast.success("Leave application submitted successfully!");
+      handleReset();
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to apply for leave. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   // Reset form
   const handleReset = () => {
     setFormData({
@@ -166,13 +374,36 @@ function EmployeeLeave() {
     setErrors({});
     setTouched({});
   };
-  const data = [
-    { id: 1, employee_name: "John Doe", date: "2025-01-10", leave_type: "Sick Leave", requested_duration: "2 days", status: "Pending" },
-    { id: 2, employee_name: "Jane Smith", date: "2025-01-12", leave_type: "Casual Leave", requested_duration: "1 day", status: "Approved" },
-  ];
 
+  //view leave status form
+  const [leaveList, setLeaveList] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+
+  useEffect(() => {
+    fetchEmployeesLeaveList();
+  }, []);
+
+  const fetchEmployeesLeaveList = async () => {
+    const token = sessionStorage.getItem("token");
+    const userId = sessionStorage.getItem("user_id");
+    try {
+      const response = await axios.get("get-leave-list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          userId: userId,
+        },
+      });
+      if (response.data.status === "success") {
+        setLeaveList(response.data.LeaveRecord);
+      } else {
+        console.error("Unexpected response format:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching EmployeesList:", error);
+    }
+  };
 
   const handleView = (row) => {
     setSelectedRow(row);
@@ -183,99 +414,75 @@ function EmployeeLeave() {
     setModalIsOpen(false);
     setSelectedRow(null);
   };
+
   const handleDelete = (row) => {
     console.log("Deleting:", row);
   };
-
-  // Define columns for DataTable
-  const columns = [
-    {
-      name: '#',
-      selector: row => row.id,
-      sortable: true,
-      width: '70px'
-    },
-    {
-      name: 'Employee',
-      selector: row => row.employee_name,
-      sortable: true,
-    },
-    {
-      name: 'Date',
-      selector: row => row.date,
-      sortable: true,
-    },
-    {
-      name: 'Leave Type',
-      selector: row => row.leave_type,
-      sortable: true,
-    },
-    {
-      name: 'Duration',
-      selector: row => row.requested_duration,
-      sortable: true,
-    },
-    {
-      name: 'Status',
-      selector: row => row.status,
-      sortable: true,
-      cell: row => (
-        <span className={`badge ${row.status === 'Approved' ? 'bg-success' : 'bg-warning'}`}>
-          {row.status}
-        </span>
-      )
-    },
-    {
-      name: 'Actions',
-      cell: row => (
-        <div className="d-flex gap-2">
-
-          <button className="cursor-pointer btn btn-primary me-" >
-            <FontAwesomeIcon icon={faEdit} />
-          </button>
-
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => handleView(row)}
-          >
-            <FaEye />
-          </button>
-          <button
-            className="btn btn-danger btn-sm"
-            onClick={() => handleDelete(row)}
-          >
-            <FaTrash />
-          </button>
-        </div>
-      ),
-      width: '120px'
-    }
-  ];
-
-  // Custom styles for DataTable
+  //View leave status
+  // Update your customStyles object to remove overflow constraints
   const customStyles = {
+    table: {
+      style: {
+        width: '100%',
+        tableLayout: 'fixed', // This helps with column width distribution
+      },
+    },
     headRow: {
       style: {
         backgroundColor: '#f8f9fa',
-        borderTopStyle: 'solid',
-        borderTopWidth: '1px',
-        borderTopColor: '#dee2e6',
+        minHeight: '56px',
+        whiteSpace: 'normal', // Allow text wrapping in headers
+        wordBreak: 'break-word' // Break words if needed
       },
     },
-    headCells: {
+    rows: {
       style: {
-        fontSize: '14px',
-        fontWeight: 'bold',
-        padding: '16px',
+        minHeight: '50px',
       },
     },
     cells: {
       style: {
-        padding: '16px',
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        whiteSpace: 'normal', // Allow text wrapping in cells
+        wordBreak: 'break-word' // Break words if needed
       },
     },
   };
 
+  // Update your columns with better width distribution
+  const columns = [
+    { name: "#", selector: (row) => row.id, sortable: true, width: "60px" },
+    { name: "Employee ID", selector: (row) => row.user_id, sortable: true, width: "130px" },
+    { name: "Leave Type", selector: (row) => row.leave_type_name, sortable: true, width: "120px" },
+    { name: "Start Date", selector: (row) => row.leave_start_date, sortable: true, width: "110px" },
+    { name: "End Date", selector: (row) => row.leave_end_date, sortable: true, width: "110px" },
+    { name: "Duration", selector: (row) => row.no_of_leaves, sortable: true, width: "100px" },
+    {
+      name: "Status", selector: (row) => row.request_status, sortable: true, width: "100px",
+      cell: (row) => (<span className={`badge ${row.request_status === "Approved" ? "bg-success" : "bg-warning"}`}>{row.request_status}</span>)
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <div className="d-flex gap-2">
+          <button className="cursor-pointer btn btn-primary me-"
+            style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "#0047bb" }}>
+            <FontAwesomeIcon icon={faEdit} />
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={() => handleView(row)}
+            style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "#0047bb" }}>
+            <FontAwesomeIcon icon={faEye} />
+          </button>
+          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row)}
+            style={{ background: "none", border: "none", outline: "none", cursor: "pointer", fontSize: "1rem", color: "red" }}>
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
+        </div>
+      ),
+      width: "110px",
+    },
+  ];
   //entitlementForm 
   const [entitlementForm, setEntitlementForm] = useState({
     leave_type: '',
@@ -373,6 +580,7 @@ function EmployeeLeave() {
     },
   ];
 
+  // Apply/Reject froms
   const [approveData, setApproveData] = useState([
     {
       employee: 'Pishuu',
@@ -471,42 +679,42 @@ function EmployeeLeave() {
     <div className="d-flex flex-nowrap overflow-auto px-2"></div> */}
 
       <div className="row justify-content-left  mt-4">
-  <div className="col-12 col-md-10 col-lg-8 bg-white rounded-lg shadow p- w-100">
-    {/* Scrollable container with Bootstrap classes only */}
-    <div className="d-flex flex-nowrap overflow-auto pb-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-      <button
-        className={`btn ${activeTab === "leave_entitlement" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
-        onClick={() => setActiveTab("leave_entitlement")}
-      >
-        Leave Entitlement
-      </button>
-      <button
-        className={`btn ${activeTab === "approve" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
-        onClick={() => setActiveTab("approve")}
-      >
-        Approve/Reject
-      </button>
-      <button
-        className={`btn ${activeTab === "assign" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
-        onClick={() => setActiveTab("assign")}
-      >
-        Assign
-      </button>
-      <button
-        className={`btn ${activeTab === "apply" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
-        onClick={() => setActiveTab("apply")}
-      >
-        Apply Leave
-      </button>
-      <button
-        className={`btn ${activeTab === "status" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
-        onClick={() => setActiveTab("status")}
-      >
-        View Leave Status
-      </button>
-    </div>
-  </div>
-</div>
+        <div className="col-12 col-md-10 col-lg-8 bg-white rounded-lg shadow p- w-100">
+          {/* Scrollable container with Bootstrap classes only */}
+          <div className="d-flex flex-nowrap overflow-auto pb-2" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+            <button
+              className={`btn ${activeTab === "leave_entitlement" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+              onClick={() => setActiveTab("leave_entitlement")}
+            >
+              Leave Entitlement
+            </button>
+            <button
+              className={`btn ${activeTab === "approve" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+              onClick={() => setActiveTab("approve")}
+            >
+              Approve/Reject
+            </button>
+            <button
+              className={`btn ${activeTab === "assign" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+              onClick={() => setActiveTab("assign")}
+            >
+              Assign
+            </button>
+            <button
+              className={`btn ${activeTab === "apply" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+              onClick={() => setActiveTab("apply")}
+            >
+              Apply Leave
+            </button>
+            <button
+              className={`btn ${activeTab === "status" ? "btn-primary" : "btn-outline-primary"} me-2 flex-shrink-0 text-nowrap`}
+              onClick={() => setActiveTab("status")}
+            >
+              View Leave Status
+            </button>
+          </div>
+        </div>
+      </div>
       {/* Content Based on Active Tab */}
       {activeTab === "apply" && (
         <div className="mt-5">
@@ -520,18 +728,28 @@ function EmployeeLeave() {
                     <label htmlFor="leaveType" className="form-label">
                       Leave Type <span className="text-danger">*</span>
                     </label>
-                    <select
+                    {/* <select
                       id="leaveType"
                       className={`form-select ${errors.leaveType ? 'is-invalid' : ''}`}
                       value={formData.leaveType}
                       onChange={handleChange}
-                      onBlur={handleBlur}
                     >
                       <option value="">--Select--</option>
                       <option value="sick">Sick Leave</option>
                       <option value="casual">Casual Leave</option>
                     </select>
-                    {errors.leaveType && <div className="invalid-feedback">{errors.leaveType}</div>}
+                    {errors.leaveType && <div className="invalid-feedback">{errors.leaveType}</div>} */}
+                    <select className={`form-select ${errors.leaveType ? 'is-invalid' : ''}`}
+                      name="leaveType"
+                      value={formData.leaveType}
+                      onChange={(e) => setFormData({ ...formData, leaveType: e.target.value })}
+                    >
+                      <option value="">Select Leave Type</option>
+                      <option value="1">Sick Leave</option>
+                      <option value="2">Casual Leave</option>
+                      <option value="3">Annual Leave</option>
+                    </select>
+
                   </div>
 
                   {/* Leaves Remaining */}
@@ -544,8 +762,7 @@ function EmployeeLeave() {
                       id="leavesRemaining"
                       className="form-control"
                       value={formData.leavesRemaining}
-                      readOnly
-                    />
+                      onChange={handleChange} />
                   </div>
 
                   {/* From Date */}
@@ -559,7 +776,6 @@ function EmployeeLeave() {
                       className={`form-control ${errors.fromDate ? 'is-invalid' : ''}`}
                       value={formData.fromDate}
                       onChange={handleChange}
-                      onBlur={handleBlur}
                     />
                     {errors.fromDate && <div className="invalid-feedback">{errors.fromDate}</div>}
                   </div>
@@ -575,89 +791,85 @@ function EmployeeLeave() {
                       className={`form-control ${errors.toDate ? 'is-invalid' : ''}`}
                       value={formData.toDate}
                       onChange={handleChange}
-                      onBlur={handleBlur}
                     />
                     {errors.toDate && <div className="invalid-feedback">{errors.toDate}</div>}
                   </div>
 
                   {/* Partial Days */}
+                  {/* Partial Days */}
                   <div className="col-12">
-                    <label className="form-label">
-                      Partial Days <span className="text-danger">*</span>
-                    </label>
-                    <div className="d-flex flex-wrap gap-3">
-                      {[
-                        { value: 'none', label: 'None' },
-                        { value: 'half', label: 'Half Day' },
-                        { value: 'start', label: 'Start Day Only' },
-                        { value: 'end', label: 'End Day Only' },
-                        { value: 'both', label: 'Start and End Day' }
-                      ].map(option => (
+                    <label className="form-label">Partial Days</label>
+                    <div className="d-flex flex-wrap gap-3"> {/* Use flexbox to align side by side */}
+                      {partialDaysOptions.map((option) => (
                         <div className="form-check" key={option.value}>
                           <input
                             className="form-check-input"
                             type="radio"
-                            name="partialDays"
+                            name="partial_days"
                             value={option.value}
-                            checked={formData.partialDays === option.value}
+                            checked={formData.partial_days === option.value}
                             onChange={handleChange}
+                            disabled={!getPartialDaysOptions().includes(option.value)}
                           />
-                          <label className="form-check-label" htmlFor={`partial${option.value}`}>
-                            {option.label}
-                          </label>
+                          <label className="form-check-label">{option.label}</label>
                         </div>
                       ))}
                     </div>
-                    {errors.partialDays && <div className="invalid-feedback">{errors.partialDays}</div>}
                   </div>
+
+                  {/* Show Start Day Session ONLY if "Start Day Only" or "Start & End Day" is selected */}
+                  {(formData.partial_days === "partial_start" || formData.partial_days === "partial_start_end") && (
+                    <div className="col-md-6">
+                      <label htmlFor="startSession" className="form-label">Start Day Session (AN/FN)</label>
+                      <select id="startSession" className="form-select" value={formData.startSession} onChange={handleChange}>
+                        <option value="">Select</option>
+                        <option value="AM">Morning (AN)</option>
+                        <option value="PM">Afternoon (FN)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Show End Day Session ONLY if "End Day Only" or "Start & End Day" is selected */}
+                  {(formData.partial_days === "partial_end" || formData.partial_days === "partial_start_end") && (
+                    <div className="col-md-6">
+                      <label htmlFor="endSession" className="form-label">End Day Session (AN/FN)</label>
+                      <select id="endSession" className="form-select" value={formData.endSession} onChange={handleChange}>
+                        <option value="">Select</option>
+                        <option value="AM">Morning (AN)</option>
+                        <option value="PM">Afternoon (FN)</option>
+                      </select>
+                    </div>
+                  )}
 
                   {/* Total Duration */}
                   <div className="col-md-6">
-                    <label htmlFor="totalDuration" className="form-label">
-                      Total Duration
-                    </label>
+                    <label htmlFor="totalDuration" className="form-label">Total Duration</label>
                     <input type="text" id="totalDuration" className="form-control" value={formData.totalDuration} readOnly />
                   </div>
 
                   {/* Comments */}
                   <div className="col-12">
                     <label htmlFor="comments" className="form-label">
-                      Comments <span className="text-danger">*</span>
+                      Comments
                     </label>
                     <textarea
                       id="comments"
                       className={`form-control ${errors.comments ? 'is-invalid' : ''}`}
                       value={formData.comments}
                       onChange={handleChange}
-                      onBlur={handleBlur}
                       rows={3}
                     />
-                    {errors.comments && <div className="invalid-feedback">{errors.comments}</div>}
                   </div>
 
                   {/* Attachments */}
                   <div className="col-12">
-                    <label htmlFor="attachments" className="form-label">
-                      Attachments
-                    </label>
-                    <input
-                      type="file"
-                      id="attachments"
-                      className={`form-control ${touched.attachments && errors.attachments ? 'is-invalid' : ''}`}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      accept=".jpg,.jpeg,.png,.pdf"
-                    />
-                    {touched.attachments && errors.attachments && (
-                      <div className="invalid-feedback d-block">{errors.attachments}</div>
-                    )}
+                    <label htmlFor="attachments" className="form-label">Attachments</label>
+                    <input type="file" id="attachments" className="form-control" onChange={handleChange} accept=".jpg,.jpeg,.png,.pdf" />
                   </div>
 
                   {/* Buttons */}
                   <div className="col-12 d-flex justify-content-end">
-                    <button type="reset" className="btn btn-secondary me-2">
-                      Cancel
-                    </button>
+                    <button type="reset" className="btn btn-secondary me-2">Cancel</button>
                     <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                       {isSubmitting ? 'Applying...' : 'Apply'}
                     </button>
@@ -667,10 +879,9 @@ function EmployeeLeave() {
             </div>
           </div>
         </div>
-
       )}
       {activeTab === "status" && (
-        <div className="container-fluid py-4">
+        <div className="container-fluid py-4" >
           <div className="row justify-content-center">
             <div className="col-12 col-md-10 col-lg-8 p-4 bg-white rounded-lg shadow">
               <h3 className="mb-4">View Leave Status</h3>
@@ -691,7 +902,7 @@ function EmployeeLeave() {
               {/* Data Table */}
               <DataTable
                 columns={columns}
-                data={data}
+                data={leaveList}
                 pagination
                 paginationPerPage={10}
                 paginationRowsPerPageOptions={[5, 10, 15, 20]}
@@ -932,7 +1143,7 @@ function EmployeeLeave() {
 
             <h3 className="mb-4">Assign Leave</h3>
 
-            <form onSubmit={handleSubmit} onReset={handleReset}>
+            <form onReset={handleReset}>
 
               {/* First Row: Employee Name, Leave Type */}
               <div className="row g-3">
