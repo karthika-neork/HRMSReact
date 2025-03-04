@@ -17,6 +17,41 @@ function EmployeeDashboard() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [userAttendance, setUserAttendance] = useState(null);
 
+  const [leaves, setLeaves] = useState([]);
+
+// Leave counts showing on the cards
+  const [leaveCounts, setLeaveCounts] = useState(null);
+  useEffect(() => {
+    const fetchLeaveCounts = async () => {
+      const token = sessionStorage.getItem("token");
+      const userId = sessionStorage.getItem("user_id");
+
+      if (!token || !userId) {
+        alert("User not authenticated");
+        return;
+      }
+
+      try {
+        const response = await axios.get("get-leave-count", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            userId: userId,
+          },
+        });
+
+        if (response.status !== 200) {
+          throw new Error("Failed to fetch leave counts");
+        }
+
+        setLeaveCounts(response.data.data);
+      } catch (error) {
+        console.error("Error fetching leave counts:", error);
+      }
+    };
+
+    fetchLeaveCounts()
+  }, [])
   // const handlePunch = async () => {
   //   const token = sessionStorage.getItem('token');
   //   const userId = sessionStorage.getItem('user_id');
@@ -61,7 +96,7 @@ function EmployeeDashboard() {
     const storedPunchStatus = sessionStorage.getItem('punchStatus');
     if (storedPunchStatus === 'punchedIn') {
       setIsPunchedIn(true);
-      
+
       // Also restore punch in time if available
       const storedPunchInTime = sessionStorage.getItem('punchInTime');
       if (storedPunchInTime) {
@@ -71,21 +106,21 @@ function EmployeeDashboard() {
       setIsPunchedIn(false);
     }
   }, []);
-  
+
   // Update your handlePunch function
   const handlePunch = async () => {
     const token = sessionStorage.getItem('token');
     const userId = sessionStorage.getItem('user_id');
-  
+
     if (!token || !userId) {
       alert('User not authenticated');
       return;
     }
-  
+
     const url = isPunchedIn
       ? '/punch-out'
       : '/punch-in';
-  
+
     try {
       const response = await axios({
         method: 'POST',
@@ -96,7 +131,7 @@ function EmployeeDashboard() {
           'userId': userId
         }
       });
-      
+
       if (isPunchedIn) {
         setPunchOutTime(new Date());
         // When punching out, clear the punch status
@@ -110,7 +145,7 @@ function EmployeeDashboard() {
         sessionStorage.setItem('punchStatus', 'punchedIn');
         sessionStorage.setItem('punchInTime', now.toISOString());
       }
-      
+
       setIsPunchedIn(!isPunchedIn);
       setOnBreak(false);
     } catch (error) {
@@ -120,7 +155,7 @@ function EmployeeDashboard() {
       alert(errorMessage);
     }
   };
-  
+
 
   const handleBreak = async () => {
     if (loading) return; // Prevent multiple requests
@@ -188,23 +223,40 @@ function EmployeeDashboard() {
     fetchAttendance();
   }, []);
 
-  const holidays = [
-    { id: 1, day: 'Wednesday', date: 'January 01, 2025', name: 'New Year' },
-    { id: 2, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 3, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 4, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 5, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 6, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
-    { id: 7, day: 'Wednesday', date: 'February 26, 2025', name: 'Maha Shivaratri' },
+  // Holiday table
+  const [holidays, setHolidays] = useState([]);
+  const [error, setError] = useState(null);
 
-  ];
+  const fetchHolidays = async () => {
+    const token = sessionStorage.getItem("token");
+    const userId = sessionStorage.getItem("user_id");
+
+    if (!token || !userId) {
+      console.error("Token or User ID is missing");
+      return;
+    }
+    try {
+      const response = await axios.get('/holiday-list', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId
+        },
+      });
+      setHolidays(response.data.holidays || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch holiday list');
+    } finally {
+      setLoading(false);
+    }
+
+  }
+  useEffect(() => {
+    fetchHolidays()
+  }, []);
+
+  if (loading) return <p>Loading holidays...</p>;
+  if (error) return <p>{error}</p>;
 
   const calculateLoggedHours = (inTime, outTime) => {
     const inDate = new Date(inTime);
@@ -230,27 +282,34 @@ function EmployeeDashboard() {
       <div className="row d-flex justify-content-center mt-5">
         <div className="col-md-4">
           <div className="card w-100 bg-white">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5 className="card-title">Casual Leave</h5>
-              <p className="card-text">Details about casual leave.</p>
+              <p className="card-text d-flex justify-content-center">
+                <span className="me-2">{leaveCounts?.TotalCasualLeaveCount ?? "0"}</span> /
+                <span className="ms-2">{leaveCounts?.CasualLeaveTaken ?? "0"}</span>
+              </p>
             </div>
           </div>
         </div>
 
         <div className="col-md-4">
           <div className="card w-100 bg-white">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5 className="card-title">Sick Leave</h5>
-              <p className="card-text">Details about sick leave.</p>
+              <p className="card-text d-flex justify-content-center">
+                <span className="me-2">{leaveCounts?.SickLeaveCount ?? "0"}</span> /<span className="ms-2">0</span>
+              </p>
             </div>
           </div>
         </div>
 
         <div className="col-md-4">
           <div className="card w-100 bg-white">
-            <div className="card-body">
+            <div className="card-body text-center">
               <h5 className="card-title">Privilege Leave</h5>
-              <p className="card-text">Details about privilege Leave.</p>
+              <p className="card-text d-flex justify-content-center">
+                <span className="me-2">0</span> / <span className="ms-2">0</span>
+              </p>
             </div>
           </div>
         </div>
@@ -387,14 +446,20 @@ function EmployeeDashboard() {
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {holidays.map((holiday) => (
-                      <tr key={holiday.id}>
-                        <td className="text-center align-middle">{holiday.id}</td>
-                        <td className="text-center align-middle">{holiday.day}</td>
-                        <td className="text-center align-middle">{holiday.date}</td>
-                        <td className="text-center align-middle">{holiday.name}</td>
+                    {holidays.length > 0 ? (
+                      holidays.map((holiday) => (
+                        <tr key={holiday.id}>
+                          <td className="text-center align-middle">{holiday.id}</td>
+                          <td className="text-center align-middle">{holiday.holiday_name}</td>
+                          <td className="text-center align-middle">{holiday.holiday_date}</td>
+                          <td className="text-center align-middle">{holiday.description}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="text-center py-3">No holidays available</td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -506,18 +571,18 @@ function EmployeeDashboard() {
                   <thead>
                     <tr className="bg-dark text-white position-sticky top-0">
                       <th className="text-center align-middle" style={{ width: '5%' }}>#</th>
-                      <th className="text-center align-middle" style={{ width: '25%' }}>Holiday Day</th>
-                      <th className="text-center align-middle" style={{ width: '35%' }}>Holiday Date</th>
-                      <th className="text-center align-middle" style={{ width: '35%' }}>Holiday Name</th>
+                      <th className="text-center align-middle" style={{ width: '25%' }}>Name</th>
+                      <th className="text-center align-middle" style={{ width: '35%' }}>Designation </th>
+                      <th className="text-center align-middle" style={{ width: '35%' }}>Status</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {holidays.map((holiday) => (
-                      <tr key={holiday.id}>
-                        <td className="text-center align-middle">{holiday.id}</td>
-                        <td className="text-center align-middle">{holiday.day}</td>
-                        <td className="text-center align-middle">{holiday.date}</td>
-                        <td className="text-center align-middle">{holiday.name}</td>
+                    {leaves.map((leave) => (
+                      <tr key={leave.id}>
+                        <td className="text-center align-middle">{leave.id}</td>
+                        <td className="text-center align-middle">{leave.day}</td>
+                        <td className="text-center align-middle">{leave.date}</td>
+                        <td className="text-center align-middle">{leave.name}</td>
                       </tr>
                     ))}
                   </tbody>
