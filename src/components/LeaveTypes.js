@@ -117,6 +117,7 @@ function LeaveTypes() {
 
 
     const columns = [
+        { name: "S.No", selector: (row, index) => index + 1, sortable: true,  },
         { name: "Leave Type Code", selector: (row) => row.leave_type_code, sortable: true },
         { name: "Leave Type Name", selector: (row) => row.leave_type_name, sortable: true },
         { name: "Status", selector: row => row.status, sortable: true },

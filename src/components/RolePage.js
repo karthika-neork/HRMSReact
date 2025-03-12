@@ -164,19 +164,19 @@ function Role() {
       name: "#",
       selector: (row, index) => (currentPage - 1) * pageSize + index + 1,
       sortable: false,
-      width: '100px'
+      width: '120px'
     },
     {
       name: "Role Name",
       selector: row => row.name,
       sortable: true,
-      width: '330px'
+      width: '350px'
     },
     {
       name: "Description",
       selector: row => row.description,
       sortable: true,
-      width: '330px'
+      width: '600px'
     },
     {
       name: "Action",
@@ -192,7 +192,7 @@ function Role() {
           <a className="cursor-pointer text-primary ms-2 custom-icon"><FaEye /></a>
         </div>
       ),
-      width: '330px'
+      width: '130px'
     }
   ];
   const handlePageSizeChange = (e) => {
@@ -360,6 +360,22 @@ function Role() {
     toggleSidebar();
   };
 
+  const sampleRoles = [
+    {
+      role_id: 1,
+      name: "Administrator",
+      description: "Has full access to all system features and settings.",
+      permissions: ["view_users", "edit_users", "delete_users", "manage_roles"],
+    },
+    {
+      role_id: 2,
+      name: "Editor",
+      description: "Can edit content but has limited access to system settings.",
+      permissions: ["view_content", "edit_content"],
+    },
+  ];
+  
+  
   return (
     <div className="table-container" style={{ overflowX: 'hidden', overflowY: 'hidden', width: '100%', padding: '30px' }}>
       <div className="row">
@@ -388,7 +404,7 @@ function Role() {
         </div>
         <DataTable
           columns={columns}
-          data={roles}
+          data={sampleRoles}
           pagination
           paginationServer
           paginationTotalRows={totalCount}
@@ -417,8 +433,8 @@ function Role() {
 
 
       <div className="offcanvas offcanvas-end customeoff addtask" tabIndex="-1" id="offcanvasExample1">
-        <div className="offcanvas-header" style={{ backgroundColor: 'blue' }}>
-          <h5 className="modal-title" id="gridSystemModal1">{'edit' ? 'Edit Role' : 'Add New Role'}</h5>
+        <div className="offcanvas-header" style={{ backgroundColor: '#0047bb' }}>
+          <h5 className="modal-title text-white" id="gridSystemModal1">{ 'Add New Role'}</h5>
           <button onClick={handleCancel} type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
             <i className="fa fa-close"></i>
           </button>

@@ -90,6 +90,29 @@ function EmployeeLeaveList() {
         }
     };
 
+    const sampleData = [
+        {
+            id: 1,
+            empCode: "EMP001",
+            name: "John Doe",
+            casual_leave_count: 5,
+            unpaid_leave_count: 2,
+            sick_leave_count: 3,
+            lop: 1
+        },
+        {
+            id: 2,
+            empCode: "EMP002",
+            name: "Jane Smith",
+            casual_leave_count: 4,
+            unpaid_leave_count: 1,
+            sick_leave_count: 2,
+            lop: 0
+        }
+    ];
+    
+    // setEmpLeaveList(sampleData);
+    
     const columns = [
         { name: "#", selector: (row, index) => index + 1, sortable: true },
         { name: "EMP-CODE", selector: (row) => row.empCode, sortable: true },
@@ -170,7 +193,7 @@ function EmployeeLeaveList() {
             <div className="bg-white p-3 rounded shadow">
                 <DataTable
                     columns={columns}
-                    data={empleavelist}
+                    data={sampleData}
                     pagination
                     highlightOnHover
                     responsive
