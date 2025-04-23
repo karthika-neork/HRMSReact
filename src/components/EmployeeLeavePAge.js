@@ -1275,6 +1275,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import axios from '../axiosConfig';
 import { toast } from "react-toastify";
+import { useForm ,Controller } from "react-hook-form";
 
 // Inside your component
 function EmployeeLeave() {
@@ -1296,7 +1297,10 @@ function EmployeeLeave() {
     setPageIndex(newPage);
   };
 
-  // apply form
+  const [ setErrors] = useState();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form data for existing functionality
   const [formData, setFormData] = useState({
     leaveType: '',
     leavesRemaining: '',
@@ -1310,16 +1314,35 @@ function EmployeeLeave() {
     attachments: null
   });
 
+  // Setup React Hook Form
+  const { 
+    register, 
+    handleSubmit, 
+    watch, 
+    setValue, 
+    reset, 
+    control,
+    formState: { errors } 
+  } = useForm({
+    defaultValues: {
+      leaveType: '',
+      leavesRemaining: '',
+      fromDate: '',
+      toDate: '',
+      partial_days: 'partial_none',
+      startSession: '',
+      endSession: '',
+      totalDuration: '',
+      comments: '',
+      attachments: null
+    }
+  });
 
-
-  // Handle input changes
-  const [errors, setErrors] = useState({});
+  // Additional state for form validation
+  const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [allowedPartialDays, setAllowedPartialDays] = useState(["none", "Half day", "Start Day Only", "End Day Only", "Start and End Day"]);
-
-
+  // Partial days options
   const partialDaysOptions = [
     { value: "partial_none", label: "None" },
     { value: "partial_all", label: "Half Day" },
@@ -1328,15 +1351,16 @@ function EmployeeLeave() {
     { value: "partial_start_end", label: "Start and End Day" },
   ];
 
-  const getPartialDaysOptions = useCallback(() => {
-    if (!formData.fromDate || !formData.toDate) {
-      return ["partial_none", "partial_all", "partial_start", "partial_end", "partial_start_end"];
-    }
-    return formData.fromDate === formData.toDate
-      ? ["partial_none", "partial_all"] // Only None & Half Day for same-day leave
-      : ["partial_none", "partial_start", "partial_end", "partial_start_end"]; // Exclude Half Day
-  }, [formData.fromDate, formData.toDate]);
-  
+  // Watch form values for calculations
+  const watchFromDate = watch('fromDate');
+  const watchToDate = watch('toDate');
+  const watchPartialDays = watch('partial_days');
+
+  const [allowedPartialDays, setAllowedPartialDays] = useState([
+    "partial_none", "partial_all", "partial_start", "partial_end", "partial_start_end"
+  ]);
+
+  // Calculate total duration based on dates and partial days
   const calculateTotalDuration = useCallback((fromDate, toDate, partialDays) => {
     if (!fromDate || !toDate) return "";
   
@@ -1356,7 +1380,19 @@ function EmployeeLeave() {
         return totalDays.toString(); // Full day count
     }
   }, []);
-  
+
+  // Get available partial day options based on selected dates
+  const getPartialDaysOptions = useCallback(() => {
+    if (!watchFromDate || !watchToDate) {
+      return ["partial_none", "partial_all", "partial_start", "partial_end", "partial_start_end"];
+    }
+    
+    return watchFromDate === watchToDate
+      ? ["partial_none", "partial_all"] // Only None & Half Day for same-day leave
+      : ["partial_none", "partial_start", "partial_end", "partial_start_end"]; // Exclude Half Day
+  }, [watchFromDate, watchToDate]);
+
+  // Update partial days and duration for form data (used by existing functionality)
   const updatePartialDaysAndDuration = useCallback(
     (updatedForm) => {
       const { fromDate, toDate, partial_days } = updatedForm;
@@ -1384,6 +1420,7 @@ function EmployeeLeave() {
     [calculateTotalDuration]
   );
   
+  // Handle input changes for existing functionality
   const handleChange = useCallback(
     (e) => {
       const { id, name, value, type, files } = e.target;
@@ -1402,94 +1439,13 @@ function EmployeeLeave() {
     [updatePartialDaysAndDuration]
   );
 
-  // Update Partial Days Options and Calculate Total Duration
-  // const updatePartialDaysAndDuration = (updatedForm) => {
-  //   const { fromDate, toDate, partialDays } = updatedForm;
-
-  //   if (!fromDate || !toDate) return;
-
-  //   const from = new Date(fromDate);
-  //   const to = new Date(toDate);
-  //   const diffDays = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1; // Inclusive of both dates
-
-  //   let allowedPartialDays = ["none"];
-  //   if (diffDays === 1) {
-  //     // Same Day Leave → Only show None & Half Day
-  //     allowedPartialDays = ["none", "Half Day"];
-  //   } else if (diffDays > 1) {
-  //     // Multi-day Leave → Show Start Day, End Day, Both
-  //     allowedPartialDays = ["none", "Start Day Only", "End Day Only", "Start and End Day"];
-  //   }
-
-  //   let duration = diffDays;
-  //   if (partialDays === "Half Day" && diffDays === 1) {
-  //     duration = 0.5;
-  //   } else if (partialDays === "Start Day Only" || partialDays === "End Day Only") {
-  //     duration = diffDays - 0.5;
-  //   } else if (partialDays === "Start and End Day") {
-  //     duration = diffDays - 1;
-  //   }
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     totalDuration: duration,
-  //     partialDays: allowedPartialDays.includes(partialDays) ? partialDays : "none", // Reset partialDays if it's invalid
-  //   }));
-
-  //   setAllowedPartialDays(allowedPartialDays);
-  // };
-
-  // Handle input changes
-  // const handleChange = (e) => {
-  //   const { id, value, type, files, name } = e.target;
-  //   const fieldId = id || name;
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [fieldId]: type === "file" ? files[0] : value,
-  //   }));
-
-  //   setTouched((prev) => ({
-  //     ...prev,
-  //     [fieldId]: true,
-  //   }));
-
-  //   if (errors[fieldId]) {
-  //     setErrors((prev) => ({
-  //       ...prev,
-  //       [fieldId]: "",
-  //     }));
-  //   }
-  // };
-  // Handle field blur for validation
-
-
-  const handleBlur = (e) => {
-    const { id, name } = e.target;
-    const fieldId = id || name;
-    setTouched((prev) => ({
-      ...prev,
-      [fieldId]: true,
-    }));
-
-    const fieldError = validateField(fieldId, formData[fieldId]);
-    if (fieldError) {
-      setErrors((prev) => ({
-        ...prev,
-        [fieldId]: fieldError,
-      }));
-    }
-  };
-
-  // Validate single field
+  // Field validation for existing functionality
   const validateField = (fieldName, value) => {
     switch (fieldName) {
       case 'leaveType':
         return !value ? 'Leave type is required' : '';
-
       case 'leavesRemaining':
         return !value ? 'Leave remaining is required' : '';
-
       case 'fromDate':
         return !value ? 'From date is required' : '';
       case 'toDate':
@@ -1502,66 +1458,97 @@ function EmployeeLeave() {
         return !value ? 'Please select a partial days option' : '';
       case 'comments':
         return !value ? 'Comments are required' : '';
-      // case 'attachments':
-      //   if (!value) return '';
-      //   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-      //   const maxSize = 5 * 1024 * 1024; // 5MB
-      //   if (!allowedTypes.includes(value.type)) {
-      //     return 'File type not supported. Please upload JPG, PNG, or PDF';
-      //   }
-      //   if (value.size > maxSize) {
-      //     return 'File size should not exceed 5MB';
-      //   }
-      //   return '';
       default:
         return '';
     }
   };
 
-  // Validate the form
+  // Handle blur event for existing functionality
+  const handleBlur = (e) => {
+    const { id, name } = e.target;
+    const fieldId = id || name;
+    setTouched((prev) => ({
+      ...prev,
+      [fieldId]: true,
+    }));
+
+    const fieldError = validateField(fieldId, formData[fieldId]);
+    if (fieldError) {
+      setFormErrors((prev) => ({
+        ...prev,
+        [fieldId]: fieldError,
+      }));
+    }
+  };
+
+  // Validate form for existing functionality
   const validateForm = useCallback(() => {
     return Object.keys(formData).reduce((errors, key) => {
       const error = validateField(key, formData[key]);
       if (error) errors[key] = error;
       return errors;
     }, {});
-  }, [formData, validateField]); 
-  
-      // Reset form
-      const handleReset = useCallback(() => {
-        setFormData({
-          leaveType: '',
-          leavesRemaining: '',
-          fromDate: '',
-          toDate: '',
-          partialDays: 'none',
-          totalDuration: '',
-          comments: '',
-          attachments: null,
-        });
-        setErrors({});
-        setTouched({});
-      }, []);
-  
-  // Handle form submission
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  }, [formData]);
 
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setIsSubmitting(false);
-      return;
+  // Update total duration whenever dates or partial days change for React Hook Form
+  useEffect(() => {
+    if (watchFromDate && watchToDate) {
+      // Validate that toDate is not before fromDate
+      const fromDateObj = new Date(watchFromDate);
+      const toDateObj = new Date(watchToDate);
+      
+      if (toDateObj >= fromDateObj) {
+        const duration = calculateTotalDuration(watchFromDate, watchToDate, watchPartialDays);
+        setValue('totalDuration', duration);
+        
+        // Update partial_days selection if current selection is invalid
+        const validOptions = getPartialDaysOptions();
+        if (!validOptions.includes(watchPartialDays)) {
+          setValue('partial_days', 'partial_none');
+        }
+      }
     }
+  }, [watchFromDate, watchToDate, watchPartialDays, setValue, calculateTotalDuration, getPartialDaysOptions]);
+
+  // Handle form reset
+  const handleReset = useCallback(() => {
+    reset({
+      leaveType: '',
+      leavesRemaining: '',
+      fromDate: '',
+      toDate: '',
+      partial_days: 'partial_none',
+      startSession: '',
+      endSession: '',
+      totalDuration: '',
+      comments: '',
+      attachments: null
+    });
+    
+    // Also reset the formData state for existing functionality
+    setFormData({
+      leaveType: '',
+      leavesRemaining: '',
+      fromDate: '',
+      toDate: "",
+      partial_days: "partial_none",
+      startSession: "",
+      endSession: "",
+      totalDuration: '',
+      comments: '',
+      attachments: null
+    });
+  }, [reset]);
+
+  // Handle form submission
+  const onSubmit = useCallback(async (data) => {
+    setIsSubmitting(true);
 
     const token = sessionStorage.getItem("token");
     const userId = sessionStorage.getItem("user_id");
-    console.log("Token:", token);
-    console.log("User ID:", userId);
-
+    
     if (!token || !userId) {
-      alert("Authentication error: Please log in again.");
+      toast.error("Authentication error: Please log in again.");
       setIsSubmitting(false);
       return;
     }
@@ -1574,29 +1561,17 @@ function EmployeeLeave() {
     };
 
     // Convert leaveType to an integer
-    const leaveTypeId = Number(formData.leaveType);
+    const leaveTypeId = Number(data.leaveType);
     if (!leaveTypeId) {
-      alert("Please select a valid leave type.");
+      toast.error("Please select a valid leave type.");
       setIsSubmitting(false);
       return;
     }
 
-    // Ensure partialDays matches API expected values
-    const partialDaysMap = {
-      none: "partial_none",
-      start: "partial_start",
-      end: "partial_end",
-      both: "partial_start_end",
-      all: "partial_all", // Ensure "all" is handled if needed
-    };
-
-    const partialDaysValue = partialDaysMap[formData.partialDays] || null;
-    console.log("Partial Days Sent:", partialDaysValue);
-
     // Ensure at least 0.5 leave days
-    const totalLeaves = parseFloat(formData.totalDuration) || 0;
+    const totalLeaves = parseFloat(data.totalDuration) || 0;
     if (totalLeaves < 0.5) {
-      alert("Total leave duration must be at least 0.5 days.");
+      toast.error("Total leave duration must be at least 0.5 days.");
       setIsSubmitting(false);
       return;
     }
@@ -1605,20 +1580,20 @@ function EmployeeLeave() {
     const requestData = {
       user_id: parseInt(userId, 10),
       leave_type_id: leaveTypeId,
-      from_date: formatDate(formData.fromDate),
-      to_date: formatDate(formData.toDate),
+      from_date: formatDate(data.fromDate),
+      to_date: formatDate(data.toDate),
       no_of_leaves: totalLeaves,
-      reason_for_leave: formData.comments,
-      partial_days: partialDaysValue,
+      reason_for_leave: data.comments,
+      partial_days: data.partial_days,
     };
 
-    // Add `partial_start_day` and `partial_end_day` conditionally
-    if (partialDaysValue === "partial_start" || partialDaysValue === "partial_start_end") {
-      requestData.partial_start_day = "FN"; // or "AN" based on user input
+    // Add partial day specifications if applicable
+    if (data.partial_days === "partial_start" || data.partial_days === "partial_start_end") {
+      requestData.partial_start_day = data.startSession === "AM" ? "FN" : "AN";
     }
 
-    if (partialDaysValue === "partial_end" || partialDaysValue === "partial_start_end") {
-      requestData.partial_end_day = "AN"; // or "FN" based on user input
+    if (data.partial_days === "partial_end" || data.partial_days === "partial_start_end") {
+      requestData.partial_end_day = data.endSession === "AM" ? "FN" : "AN";
     }
 
     try {
@@ -1633,20 +1608,15 @@ function EmployeeLeave() {
           },
         }
       );
-      console.log("Request Data:", requestData);
-      console.log("Partial Days Sent:", partialDaysValue);
-      console.log("Leave application submitted", response.data);
-
+      
       toast.success("Leave application submitted successfully!");
       handleReset();
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to apply for leave. Please try again.");
+      toast.error(error.response?.data?.message || "Failed to apply for leave. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, validateForm, handleReset]); 
-  
-    
+  }, [handleReset]);    
   //view leave status form
   const [leaveList, setLeaveList] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -1995,35 +1965,23 @@ function EmployeeLeave() {
           <div className="row justify-content-center">
             <div className="col-12 col-md-10 col-lg-8 p-4 bg-white rounded-lg shadow">
               <h3 className="mb-4">Apply Leave</h3>
-              <form onSubmit={handleSubmit} onReset={handleReset}>
+              <form onSubmit={handleSubmit(onSubmit)} onReset={handleReset}>
                 <div className="row g-3">
                   {/* Leave Type */}
                   <div className="col-md-6">
                     <label htmlFor="leaveType" className="form-label">
                       Leave Type <span className="text-danger">*</span>
                     </label>
-                    {/* <select
-                      id="leaveType"
+                    <select
                       className={`form-select ${errors.leaveType ? 'is-invalid' : ''}`}
-                      value={formData.leaveType}
-                      onChange={handleChange}
-                    >
-                      <option value="">--Select--</option>
-                      <option value="sick">Sick Leave</option>
-                      <option value="casual">Casual Leave</option>
-                    </select>
-                    {errors.leaveType && <div className="invalid-feedback">{errors.leaveType}</div>} */}
-                    <select className={`form-select ${errors.leaveType ? 'is-invalid' : ''}`}
-                      name="leaveType"
-                      value={formData.leaveType}
-                      onChange={(e) => setFormData({ ...formData, leaveType: e.target.value })}
+                      {...register("leaveType", { required: "Leave type is required" })}
                     >
                       <option value="">Select Leave Type</option>
                       <option value="1">Sick Leave</option>
                       <option value="2">Casual Leave</option>
                       <option value="3">Annual Leave</option>
                     </select>
-
+                    {errors.leaveType && <div className="invalid-feedback">{errors.leaveType.message}</div>}
                   </div>
 
                   {/* Leaves Remaining */}
@@ -2033,10 +1991,11 @@ function EmployeeLeave() {
                     </label>
                     <input
                       type="text"
-                      id="leavesRemaining"
-                      className="form-control"
-                      value={formData.leavesRemaining}
-                      onChange={handleChange} />
+                      className={`form-control ${errors.leavesRemaining ? 'is-invalid' : ''}`}
+                      {...register("leavesRemaining", { required: "Leaves remaining is required" })}
+                      readOnly
+                    />
+                    {errors.leavesRemaining && <div className="invalid-feedback">{errors.leavesRemaining.message}</div>}
                   </div>
 
                   {/* From Date */}
@@ -2046,12 +2005,10 @@ function EmployeeLeave() {
                     </label>
                     <input
                       type="date"
-                      id="fromDate"
                       className={`form-control ${errors.fromDate ? 'is-invalid' : ''}`}
-                      value={formData.fromDate}
-                      onChange={handleChange}
+                      {...register("fromDate", { required: "From date is required" })}
                     />
-                    {errors.fromDate && <div className="invalid-feedback">{errors.fromDate}</div>}
+                    {errors.fromDate && <div className="invalid-feedback">{errors.fromDate.message}</div>}
                   </div>
 
                   {/* To Date */}
@@ -2061,84 +2018,138 @@ function EmployeeLeave() {
                     </label>
                     <input
                       type="date"
-                      id="toDate"
                       className={`form-control ${errors.toDate ? 'is-invalid' : ''}`}
-                      value={formData.toDate}
-                      onChange={handleChange}
+                      {...register("toDate", { 
+                        required: "To date is required",
+                        validate: value => {
+                          if (!watchFromDate) return true;
+                          return new Date(value) >= new Date(watchFromDate) || "End date cannot be before start date";
+                        }
+                      })}
                     />
-                    {errors.toDate && <div className="invalid-feedback">{errors.toDate}</div>}
+                    {errors.toDate && <div className="invalid-feedback">{errors.toDate.message}</div>}
                   </div>
 
                   {/* Partial Days */}
-                  {/* Partial Days */}
                   <div className="col-12">
                     <label className="form-label">Partial Days</label>
-                    <div className="d-flex flex-wrap gap-3"> {/* Use flexbox to align side by side */}
-                      {partialDaysOptions.map((option) => (
-                        <div className="form-check" key={option.value}>
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            name="partial_days"
-                            value={option.value}
-                            checked={formData.partial_days === option.value}
-                            onChange={handleChange}
-                            disabled={!getPartialDaysOptions().includes(option.value)}
-                          />
-                          <label className="form-check-label">{option.label}</label>
-                        </div>
-                      ))}
+                    <div className="d-flex flex-wrap gap-3">
+                      <Controller
+                        name="partial_days"
+                        control={control}
+                        render={({ field }) => (
+                          <>
+                            {partialDaysOptions.map((option) => (
+                              <div className="form-check" key={option.value}>
+                                <input
+                                  className="form-check-input"
+                                  type="radio"
+                                  id={`partial_days_${option.value}`}
+                                  value={option.value}
+                                  checked={field.value === option.value}
+                                  onChange={() => field.onChange(option.value)}
+                                  disabled={!getPartialDaysOptions().includes(option.value)}
+                                />
+                                <label className="form-check-label" htmlFor={`partial_days_${option.value}`}>
+                                  {option.label}
+                                </label>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      />
                     </div>
                   </div>
 
                   {/* Show Start Day Session ONLY if "Start Day Only" or "Start & End Day" is selected */}
-                  {(formData.partial_days === "partial_start" || formData.partial_days === "partial_start_end") && (
+                  {(watchPartialDays === "partial_start" || watchPartialDays === "partial_start_end") && (
                     <div className="col-md-6">
                       <label htmlFor="startSession" className="form-label">Start Day Session (AN/FN)</label>
-                      <select id="startSession" className="form-select" value={formData.startSession} onChange={handleChange}>
+                      <select
+                        className={`form-select ${errors.startSession ? 'is-invalid' : ''}`}
+                        {...register("startSession", { 
+                          required: "Start day session is required for partial start day" 
+                        })}
+                      >
                         <option value="">Select</option>
                         <option value="AM">Morning (AN)</option>
                         <option value="PM">Afternoon (FN)</option>
                       </select>
+                      {errors.startSession && 
+                        <div className="invalid-feedback">{errors.startSession.message}</div>
+                      }
                     </div>
                   )}
 
                   {/* Show End Day Session ONLY if "End Day Only" or "Start & End Day" is selected */}
-                  {(formData.partial_days === "partial_end" || formData.partial_days === "partial_start_end") && (
+                  {(watchPartialDays === "partial_end" || watchPartialDays === "partial_start_end") && (
                     <div className="col-md-6">
                       <label htmlFor="endSession" className="form-label">End Day Session (AN/FN)</label>
-                      <select id="endSession" className="form-select" value={formData.endSession} onChange={handleChange}>
+                      <select
+                        className={`form-select ${errors.endSession ? 'is-invalid' : ''}`}
+                        {...register("endSession", { 
+                          required: "End day session is required for partial end day" 
+                        })}
+                      >
                         <option value="">Select</option>
                         <option value="AM">Morning (AN)</option>
                         <option value="PM">Afternoon (FN)</option>
                       </select>
+                      {errors.endSession && 
+                        <div className="invalid-feedback">{errors.endSession.message}</div>
+                      }
                     </div>
                   )}
 
                   {/* Total Duration */}
                   <div className="col-md-6">
                     <label htmlFor="totalDuration" className="form-label">Total Duration</label>
-                    <input type="text" id="totalDuration" className="form-control" value={formData.totalDuration} readOnly />
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      {...register("totalDuration")} 
+                      readOnly 
+                    />
                   </div>
 
                   {/* Comments */}
                   <div className="col-12">
                     <label htmlFor="comments" className="form-label">
-                      Comments
+                      Comments <span className="text-danger">*</span>
                     </label>
                     <textarea
-                      id="comments"
                       className={`form-control ${errors.comments ? 'is-invalid' : ''}`}
-                      value={formData.comments}
-                      onChange={handleChange}
                       rows={3}
+                      {...register("comments", { required: "Comments are required" })}
                     />
+                    {errors.comments && <div className="invalid-feedback">{errors.comments.message}</div>}
                   </div>
 
                   {/* Attachments */}
                   <div className="col-12">
                     <label htmlFor="attachments" className="form-label">Attachments</label>
-                    <input type="file" id="attachments" className="form-control" onChange={handleChange} accept=".jpg,.jpeg,.png,.pdf" />
+                    <input 
+                      type="file" 
+                      className={`form-control ${errors.attachments ? 'is-invalid' : ''}`}
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      {...register("attachments", {
+                        validate: {
+                          fileType: (value) => {
+                            // Check if value exists and has items before accessing index 0
+                            if (!value || !value.length) return true;
+                            const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+                            return allowedTypes.includes(value[0].type) || 
+                              'File type not supported. Please upload JPG, PNG, or PDF';
+                          },
+                          fileSize: (value) => {
+                            // Check if value exists and has items before accessing index 0
+                            if (!value || !value.length) return true;
+                            const maxSize = 5 * 1024 * 1024; // 5MB
+                            return value[0].size <= maxSize || 'File size should not exceed 5MB';
+                          }
+                        }
+                      })}                    />
+                    {errors.attachments && <div className="invalid-feedback">{errors.attachments.message}</div>}
                   </div>
 
                   {/* Buttons */}
@@ -2153,8 +2164,9 @@ function EmployeeLeave() {
             </div>
           </div>
         </div>
-      )}
-      {activeTab === "status" && (
+      )}      
+      
+          {activeTab === "status" && (
         <div className="container-fluid py-4" >
           <div className="row justify-content-center">
             <div className="col-12 col-md-10 col-lg-8 p-4 bg-white rounded-lg shadow">
