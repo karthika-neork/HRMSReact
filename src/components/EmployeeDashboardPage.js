@@ -4,7 +4,8 @@ import axios from '../axiosConfig';
 import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { FaClock } from "react-icons/fa";
 import { Clock, PlayCircle, PauseCircle, TimerOff } from 'lucide-react';
-
+import { List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import 'react-virtualized/styles.css';
 
 function EmployeeDashboard() {
 
@@ -416,6 +417,103 @@ function EmployeeDashboard() {
   if (loading) return <p>Loading holidays...</p>;
   if (error) return <p>{error}</p>;
 
+
+  // Component code...
+  
+  // Create a cache to store measured row heights
+  const cache = new CellMeasurerCache({
+    fixedWidth: true,
+    defaultHeight: 60,
+    minHeight: 50
+  });
+  
+
+  // Text component that truncates long text and shows tooltip
+  const TruncatedText = ({ text, maxLength = 25 }) => {
+    const isTruncated = text && text.length > maxLength;
+    const displayText = isTruncated ? `${text.substring(0, maxLength)}...` : text;
+    
+    return (
+      <div 
+        title={isTruncated ? text : ''}
+        style={{ 
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          width: '100%',
+        }}
+      >
+        {displayText}
+      </div>
+    );
+  };
+
+  // Header component for the list
+  const HeaderRow = () => (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: '0.75rem 1rem',
+        borderBottom: '2px solid #dee2e6',
+        backgroundColor: '#f8f9fa',
+        fontWeight: 'bold',
+      }}
+    >
+      <div style={{ width: '10%', textAlign: 'center' }}>ID</div>
+      <div style={{ width: '30%', textAlign: 'center' }}>Holiday Name</div>
+      <div style={{ width: '30%', textAlign: 'center' }}>Date</div>
+      <div style={{ width: '30%', textAlign: 'center' }}>Description</div>
+    </div>
+  );
+
+  const rowRenderer = ({ index, key, style, parent }) => {
+    const { id, holiday_name, holiday_date, description } = holidays[index];
+    
+    return (
+      <CellMeasurer
+        cache={cache}
+        columnIndex={0}
+        key={key}
+        parent={parent}
+        rowIndex={index}
+      >
+        {({ registerChild }) => (
+          <div
+            ref={registerChild}
+            style={{
+              ...style,
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '0.5rem 1rem',
+              borderBottom: '1px solid #dee2e6',
+              backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+            }}
+          >
+            {/* ID column */}
+            <div style={{ width: '10%', textAlign: 'center' }}>
+              <TruncatedText text={id?.toString()} maxLength={5} />
+            </div>
+            
+            {/* Holiday Name column */}
+            <div style={{ width: '30%', textAlign: 'center' }}>
+              <TruncatedText text={holiday_name} maxLength={20} />
+            </div>
+            
+            {/* Holiday Date column */}
+            <div style={{ width: '30%', textAlign: 'center' }}>
+              <TruncatedText text={holiday_date} maxLength={12} />
+            </div>
+            
+            {/* Description column with tooltip for long text */}
+            <div style={{ width: '30%', textAlign: 'center' }}>
+              <TruncatedText text={description} maxLength={25} />
+            </div>
+          </div>
+        )}
+      </CellMeasurer>
+    );
+  };  
   const calculateLoggedHours = (inTime, outTime) => {
     const inDate = new Date(inTime);
     const outDate = new Date(outTime);
@@ -614,7 +712,7 @@ function EmployeeDashboard() {
           </div>
 
           {/* Card Body */}
-          <div className="card-body p-4">
+          <div className="card-body p-4" style={{height:'400px'}}>
             <div className="row">
               {/* Time Progress Section */}
               <div className="col-md-6 d-flex flex-column align-items-center justify-content-center mb-4 mb-md-0">
@@ -676,80 +774,43 @@ function EmployeeDashboard() {
           </div>
         </div>
       </div>
-        {/* <div className="col-md-6">
-          <div className="card border shadow-sm w-100">
-            <div className="card-header bg-white py-3">
-              <h5 className="card-title mb-0 d-flex align-items-center">
-                <span className="me-2">📅</span> Holiday List
-              </h5>
-            </div>
 
-            <div className="card-body p-0">
-              <div className="table-responsive" style={{ height: '389px' }}>
-                <table className="table table-bordered table-hover mb-0">
-                  <thead>
-                    <tr className="bg-dark text-white position-sticky top-0">
-                      <th className="text-center align-middle" style={{ width: '5%' }}>#</th>
-                      <th className="text-center align-middle" style={{ width: '25%' }}>Holiday Day</th>
-                      <th className="text-center align-middle" style={{ width: '35%' }}>Holiday Date</th>
-                      <th className="text-center align-middle" style={{ width: '35%' }}>Holiday Name</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white">
-                    {holidays.length > 0 ? (
-                      holidays.map((holiday) => (
-                        <tr key={holiday.id}>
-                          <td className="text-center align-middle">{holiday.id}</td>
-                          <td className="text-center align-middle">{holiday.holiday_name}</td>
-                          <td className="text-center align-middle">{holiday.holiday_date}</td>
-                          <td className="text-center align-middle">{holiday.description}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="4" className="text-center py-3">No holidays available</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div> */}
-            <div className="col-md-6">
-      <div className="card border shadow-sm w-100">
-        <div className="card-header bg-white py-3">
-          <h5 className="card-title mb-0 d-flex align-items-center">
-            <span className="me-2">📅</span> Holiday List
-          </h5>
-        </div>
-
-        <div className="card-body p-0">
-          {loading ? (
-            <div className="text-center py-4">Loading holidays...</div>
-          ) : error ? (
-            <div className="text-danger text-center py-4">{error}</div>
-          ) : (
-            <div className="table-responsive" style={{ height: "389px" }}>
-              <table className="table table-bordered table-hover mb-0">
-                <thead>
-                  <tr className="bg-dark text-white position-sticky top-0">
-                    <th className="text-center align-middle" style={{ width: "5%" }}>#</th>
-                    <th className="text-center align-middle" style={{ width: "25%" }}>Holiday Day</th>
-                    <th className="text-center align-middle" style={{ width: "35%" }}>Holiday Date</th>
-                    <th className="text-center align-middle" style={{ width: "35%" }}>Holiday Name</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white">{renderedHolidays}</tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+<div className="col-md-6">
+  <div className="card border shadow-sm w-100">
+    <div className="card-header bg-white py-3">
+      <h5 className="card-title mb-0 d-flex align-items-center">
+        <span className="me-2">📅</span> Holiday List
+      </h5>
     </div>
 
-      </div>
-      <div className="row d-flex justify-content-center mt-5">
+    <div className="card-body p-0">
+          {holidays.length === 0 ? (
+            <div className="text-center py-3">No holidays available</div>
+          ) : (
+            <>
+              <HeaderRow />
+              <div style={{ height: '347px' }}> {/* Reduced height to account for header */}
+                <AutoSizer>
+                  {({ width, height }) => (
+                    <List
+                      width={width}
+                      height={height}
+                      rowCount={holidays.length}
+                      deferredMeasurementCache={cache}
+                      rowHeight={cache.rowHeight}
+                      rowRenderer={rowRenderer}
+                    />
+                  )}
+                </AutoSizer>
+              </div>
+            </>
+          )}
+        </div>
+          </div>
+</div>     
+</div>     
+
+ <div className="row d-flex justify-content-center mt-5">
         <div className="col-md-6">
           <div className="card bg-white shadow-sm rounded p-3 w-100" style={{ height: "450px" }}>
             <h5 className="fw-bold text-dark mb-3 d-flex align-items-center card-titler">
